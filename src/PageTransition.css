@@ -1,0 +1,23 @@
+/* src/PageTransition.css */
+
+.page-content {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .page-content-enter {
+    opacity: 0;
+  }
+  
+  .page-content-enter-active {
+    opacity: 1;
+  }
+  
+  .page-content-exit {
+    opacity: 1;
+  }
+  
+  .page-content-exit-active {
+    opacity: 0;
+  }
+  

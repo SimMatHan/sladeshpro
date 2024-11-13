@@ -1,38 +1,58 @@
-.App {
-  text-align: center;
+/* Global resets and default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+:root {
+  /* Color scheme */
+  --color-primary: #2979ff;  /* Main primary blue */
+  --color-secondary: #43a047;  /* Soft green for secondary actions */
+  --color-background: #FFFFFF;  /* General background color */
+  --color-navbar: #f8f8f8;  /* Navbar background color */
+  --color-divider: #ddd;  /* Divider line color */
+  --color-text: #333;  /* Main text color */
+  --color-muted-text: #777;  /* Muted text for secondary information */
+  --color-input-border: #ccc;  /* Border color for input fields */
+  --color-event-marker: #FC5203;  /* Border color for input fields */
+  --color-delete-button: #D9534F;
+
+  --font-size-small: 12px;
+  --font-size-medium: 16px;
+  --font-size-large: 20px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 36px;
+
+  /* Spacing */
+  --spacing-small: 8px;
+  --spacing-medium: 16px;
+  --spacing-large: 24px;
+
+  /* Border radius */
+  --border-radius: 8px;
+  --border-radius-large: 12px;
+
+  /* Shadow */
+  --box-shadow-light: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  --box-shadow-heavy: 0px 4px 8px rgba(0, 0, 0, 0.2);
+
+  /* Transition */
+  --transition-duration: 0.3s;
+  --transition-ease: ease-in-out;
+
+  /* Profile Image and Member Picture Sizes */
+  --profile-image-size: 120px;  /* Profile image size for large profile display */
+  --member-picture-size: 80px;  /* Member image size for lists or smaller displays */
+  --profile-image-border-radius: 50%; /* Circular images */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+body {
+  font-family: 'Poppins', sans-serif; /* Use Poppins as default font */
+  background-color: var(--color-background);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  font-size: var(--font-size-medium);
 }
