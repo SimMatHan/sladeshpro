@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
-import './Onboarding.css';
 
 const slides = [
   {
@@ -32,7 +31,6 @@ const Onboarding = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Set user as having completed onboarding
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
@@ -43,10 +41,17 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="onboarding-container">
-      <h1>{slides[currentSlide].title}</h1>
-      <p>{slides[currentSlide].content}</p>
-      <button onClick={handleNext}>
+    <div className="flex flex-col items-center justify-center h-screen p-6 text-center bg-white">
+      <h1 className="text-3xl font-bold text-blue-600 mb-4">
+        {slides[currentSlide].title}
+      </h1>
+      <p className="text-lg text-gray-600 mb-8">
+        {slides[currentSlide].content}
+      </p>
+      <button
+        onClick={handleNext}
+        className="px-6 py-3 bg-blue-600 text-white text-lg rounded-full shadow-md hover:bg-blue-700 transition duration-300"
+      >
         {currentSlide < slides.length - 1 ? "Next" : "Let's Go"}
       </button>
     </div>

@@ -7,7 +7,7 @@
   background-color: #fff;
   box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.1);
   position: fixed;
-  bottom: 0;
+  bottom: 20px;
   width: 100%;
 }
 

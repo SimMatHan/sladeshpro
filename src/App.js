@@ -6,7 +6,7 @@ import Onboarding from "./pages/Onboarding";
 import Hub from "./pages/Hub";
 import Charts from "./pages/Charts";
 import Profile from "./pages/Profile";
-import Overview from "./pages/Overview";  // Import Overview
+import Overview from "./pages/Overview";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
 import BottomMenu from "./components/BottomMenu";
@@ -19,7 +19,7 @@ import './App.css';
 function App() {
   const [user, loading] = useAuthState(auth);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false); // New state for notifications
+  const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -38,10 +38,10 @@ function App() {
   }, [user]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p className="text-center text-lg font-semibold">Loading...</p>;
   }
 
-  const toggleNotifications = () => setShowNotifications(prev => !prev); // Toggle notifications visibility
+  const toggleNotifications = () => setShowNotifications(prev => !prev);
 
   return (
     <div className="app-container">
@@ -53,13 +53,13 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/hub" element={user ? <Hub /> : <Navigate to="/login" />} />
           <Route path="/charts" element={user ? <Charts /> : <Navigate to="/login" />} />
-          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} /> {/* Add Profile route */}
-          <Route path="/overview" element={user ? <Overview /> : <Navigate to="/login" />} /> {/* Add Overview route */}
+          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+          <Route path="/overview" element={user ? <Overview /> : <Navigate to="/login" />} />
           <Route path="/login" element={!user ? <Login /> : <Navigate to={hasCompletedOnboarding ? "/home" : "/onboarding"} />} />
         </Routes>
       </div>
       {user && <BottomMenu />}
-      {showNotifications && <Notifications onClose={toggleNotifications} />} {/* Overlay component */}
+      {showNotifications && <Notifications onClose={toggleNotifications} />}
     </div>
   );
 }

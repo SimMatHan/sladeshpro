@@ -1,58 +1,124 @@
-/* Global resets and default styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global resets and defaults */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  /* Color scheme */
-  --color-primary: #2979ff;  /* Main primary blue */
-  --color-secondary: #43a047;  /* Soft green for secondary actions */
-  --color-background: #FFFFFF;  /* General background color */
-  --color-navbar: #f8f8f8;  /* Navbar background color */
-  --color-divider: #ddd;  /* Divider line color */
-  --color-text: #333;  /* Main text color */
-  --color-muted-text: #777;  /* Muted text for secondary information */
-  --color-input-border: #ccc;  /* Border color for input fields */
-  --color-event-marker: #FC5203;  /* Border color for input fields */
-  --color-delete-button: #D9534F;
-
-  --font-size-small: 12px;
-  --font-size-medium: 16px;
-  --font-size-large: 20px;
-  --font-size-xl: 24px;
-  --font-size-xxl: 36px;
-
-  /* Spacing */
-  --spacing-small: 8px;
-  --spacing-medium: 16px;
-  --spacing-large: 24px;
-
-  /* Border radius */
-  --border-radius: 8px;
-  --border-radius-large: 12px;
-
-  /* Shadow */
-  --box-shadow-light: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  --box-shadow-heavy: 0px 4px 8px rgba(0, 0, 0, 0.2);
-
-  /* Transition */
-  --transition-duration: 0.3s;
-  --transition-ease: ease-in-out;
-
-  /* Profile Image and Member Picture Sizes */
-  --profile-image-size: 120px;  /* Profile image size for large profile display */
-  --member-picture-size: 80px;  /* Member image size for lists or smaller displays */
-  --profile-image-border-radius: 50%; /* Circular images */
+  @apply m-0 p-0 box-border;
 }
 
 body {
-  font-family: 'Poppins', sans-serif; /* Use Poppins as default font */
-  background-color: var(--color-background);
-  color: var(--color-text);
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  font-size: var(--font-size-medium);
+  @apply font-sans text-gray-800 bg-white leading-relaxed;
+  font-family: 'Poppins', sans-serif;
 }
+
+/* Colors and fonts */
+:root {
+  --primary: #2979ff;
+  --secondary: #43a047;
+  --bg-color: #f8f8f8;
+  --divider-color: #ddd;
+  --text-muted: #777;
+  --input-border: #ccc;
+  --highlight: #FC5203;
+  --delete-btn: #D9534F;
+
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-md: 16px;
+  --font-lg: 20px;
+  --font-xl: 24px;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+
+  --shadow-light: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* App container */
+.app-container {
+  @apply min-h-screen flex flex-col bg-white;
+}
+
+/* Top Menu & Bottom Menu */
+.top-menu, .bottom-menu {
+  @apply flex items-center justify-around w-full py-3 bg-gray-100 border-t border-gray-200 fixed z-50;
+}
+.top-menu {
+  @apply top-0;
+}
+.bottom-menu {
+  @apply bottom-0;
+}
+
+/* Page Content */
+.page-content {
+  @apply mt-14 mb-16 p-4 flex-grow overflow-auto;
+}
+
+/* Button Styles */
+.button-primary {
+  @apply bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
+}
+.button-primary:hover {
+  @apply bg-blue-600;
+}
+
+.button-secondary {
+  @apply bg-secondary text-white py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
+}
+
+/* Notifications Overlay */
+.notification-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white p-4 rounded-lg shadow-lg mb-4 transition duration-300 ease-in-out transform;
+}
+.card:hover {
+  @apply scale-105;
+}
+
+/* Profile Image */
+.profile-image {
+  @apply w-24 h-24 rounded-full border border-gray-300 shadow-md;
+}
+
+/* Text & Heading Styles */
+.heading {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+.subheading {
+  @apply text-sm font-medium text-gray-600;
+}
+.text-muted {
+  @apply text-sm text-gray-500;
+}
+
+/* Grid Layouts */
+.grid-2-col {
+  @apply grid grid-cols-2 gap-4;
+}
+.grid-3-col {
+  @apply grid grid-cols-3 gap-2;
+}
+
+/* Input Fields */
+.input {
+  @apply border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-full;
+}
+
+/* Divider */
+/* Divider */
+.divider {
+  @apply border-b border-gray-300 my-2;
+}
+

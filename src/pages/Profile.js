@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { auth, db } from "../firebaseConfig";
 import { doc, getDoc, updateDoc, collection, getDocs, addDoc, query, where } from "firebase/firestore";
-import './Profile.css';
 import DesignProfilePicPopup from '../components/DesignProfilePicPopup';
 
 const Profile = () => {
@@ -12,16 +11,14 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [showDesignPopup, setShowDesignPopup] = useState(false);
-
-  const [memberChannels, setMemberChannels] = useState([]); // Kanaler brugeren er medlem af
-  const [otherChannels, setOtherChannels] = useState([]); // Kanaler brugeren ikke er medlem af
-  const [selectedChannel, setSelectedChannel] = useState(null); // Valgt kanal
-  const [accessCode, setAccessCode] = useState(''); // Adgangskode til kanalen
-  const [error, setError] = useState(''); // Fejlmeddelelse
+  const [memberChannels, setMemberChannels] = useState([]);
+  const [otherChannels, setOtherChannels] = useState([]);
+  const [selectedChannel, setSelectedChannel] = useState(null);
+  const [accessCode, setAccessCode] = useState('');
+  const [error, setError] = useState('');
 
   const user = auth.currentUser;
 
-  // Function to fetch user data from Firestore
   const fetchUserData = useCallback(async () => {
     try {
       const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -38,7 +35,6 @@ const Profile = () => {
     }
   }, [user]);
 
-  // Function to fetch channels from Firestore
   const fetchChannels = useCallback(async () => {
     try {
       const channelSnapshot = await getDocs(collection(db, 'channels'));
@@ -46,7 +42,6 @@ const Profile = () => {
         id: doc.id,
         ...doc.data(),
       }));
-
       const memberChannels = [];
       const nonMemberChannels = [];
 
@@ -69,20 +64,13 @@ const Profile = () => {
     }
   }, [user]);
 
-  // Function to handle form submission (saving changes)
   const handleSaveChanges = async (e) => {
     e.preventDefault();
     if (!user) return;
 
     try {
       const userDocRef = doc(db, "users", user.uid);
-
-      // Update Firestore with the new profile data
-      await updateDoc(userDocRef, {
-        profileImageUrl,
-        profileBackgroundColor
-      });
-
+      await updateDoc(userDocRef, { profileImageUrl, profileBackgroundColor });
       setMessage("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating profile: ", err);
@@ -90,17 +78,12 @@ const Profile = () => {
     }
   };
 
-  // Function to handle joining a channel
   const handleJoinChannel = async () => {
     if (!selectedChannel) return;
 
     if (accessCode === selectedChannel.accessCode) {
       const membersRef = collection(db, `channels/${selectedChannel.id}/members`);
-      const memberDoc = {
-        userName: user.displayName || 'Unknown User',
-        userUID: user.uid,
-      };
-
+      const memberDoc = { userName: user.displayName || 'Unknown User', userUID: user.uid };
       const existingMembersQuery = query(membersRef, where('userUID', '==', user.uid));
       const existingMembersSnapshot = await getDocs(existingMembersQuery);
 
@@ -118,12 +101,10 @@ const Profile = () => {
     }
   };
 
-  // Function to handle opening the avatar design popup
   const handleOpenDesignPopup = () => {
     setShowDesignPopup(true);
   };
 
-  // Function to handle closing the avatar design popup
   const handleCloseDesignPopup = () => {
     setShowDesignPopup(false);
     fetchUserData();
@@ -137,122 +118,110 @@ const Profile = () => {
   }, [user, fetchUserData, fetchChannels]);
 
   if (loading) {
-    return <p>Loading profile...</p>;
+    return <p className="text-center text-gray-500">Loading profile...</p>;
   }
 
   return (
-    <div className="profile-page">
-      <div className="profile-title">
-        <h1>Profile</h1>
-      </div>
+    <div className="">
+      <div className="max-w-md mx-auto p-6 bg-white rounded-lg">
+        <h1 className="text-2xl font-bold text-center text-blue-600 mb-4">Profile</h1>
 
-      <div className="profile-content">
-        <form className="profile-form" onSubmit={handleSaveChanges}>
-          <div className="profile-picture-section">
-            <div className="profile-details-container">
-              <label>Profile Picture</label>
-              <button
-                type="button"
-                className="design-profile-btn"
-                onClick={handleOpenDesignPopup}
-              >
-                Design Profile Pic
-              </button>
-            </div>
-
+        <form onSubmit={handleSaveChanges} className="space-y-4">
+          <div className="flex flex-col items-center">
             <div
-              className="profile-image-preview"
-              style={{
-                background: profileBackgroundColor || "linear-gradient(135deg, #f0f0f0, #f0f0f0)",
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                fontSize: '48px',
-                overflow: 'hidden'
-              }}
+              className="w-24 h-24 rounded-full flex items-center justify-center mb-3"
+              style={{ background: profileBackgroundColor || "linear-gradient(135deg, #f0f0f0, #f0f0f0)" }}
             >
-              <span className="avatar-emoji">{profileImageUrl || "👤"}</span>
+              <span className="text-4xl">{profileImageUrl || "👤"}</span>
             </div>
+            <button
+              type="button"
+              onClick={handleOpenDesignPopup}
+              className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-700"
+            >
+              Design Profile Pic
+            </button>
           </div>
 
           <div>
-            <label>Username</label>
+            <label className="block font-semibold text-gray-700">Username</label>
             <input
               type="text"
               value={userData.username || ""}
               disabled
-              className="disabled-input"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded bg-gray-100 text-gray-500 cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label>Email</label>
+            <label className="block font-semibold text-gray-700">Email</label>
             <input
               type="email"
               value={userData.email || ""}
               disabled
-              className="disabled-input"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded bg-gray-100 text-gray-500 cursor-not-allowed"
             />
           </div>
 
-          <div className="save-btn-wrapper">
-            <button type="submit" className="save-button">Save Changes</button>
-          </div>
+          <button type="submit" className="w-full py-2 text-white bg-blue-500 rounded hover:bg-blue-700">
+            Save Changes
+          </button>
 
-          {message && <p className="message">{message}</p>}
+          {message && <p className="mt-2 text-center text-green-500">{message}</p>}
         </form>
 
-        <h2>Your Channels</h2>
-        <div className="profile-channels">
+        <h2 className="mt-6 text-xl font-semibold text-blue-600">Your Channels</h2>
+        <div className="space-y-2 mt-3">
           {memberChannels.length > 0 ? (
             memberChannels.map((channel) => (
-              <div key={channel.id} className="profile-channel-item member-channel">
-                {channel.name} (Joined)
-              </div>
+              <div key={channel.id} className="p-3 bg-green-100 rounded-md">{channel.name} (Joined)</div>
             ))
           ) : (
-            <p>You are not a member of any channels.</p>
+            <p className="text-gray-500">You are not a member of any channels.</p>
           )}
         </div>
 
-        <h2>Available Channels</h2>
-        <div className="profile-channels">
+        <h2 className="mt-6 text-xl font-semibold text-blue-600">Available Channels</h2>
+        <div className="space-y-2 mt-3">
           {otherChannels.length > 0 ? (
             otherChannels.map((channel) => (
               <div
                 key={channel.id}
-                className="profile-channel-item non-member-channel"
+                className="p-3 bg-gray-100 rounded-md cursor-pointer hover:bg-gray-200"
                 onClick={() => setSelectedChannel(channel)}
               >
                 {channel.name}
               </div>
             ))
           ) : (
-            <p>There are no other channels available.</p>
+            <p className="text-gray-500">There are no other channels available.</p>
           )}
         </div>
 
         {selectedChannel && (
-          <div className="channel-access">
-            <h3>Join {selectedChannel.name}</h3>
+          <div className="mt-6 text-center">
+            <h3 className="text-lg font-semibold text-gray-800">Join {selectedChannel.name}</h3>
             <input
               type="password"
               placeholder="Enter access code"
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value)}
+              className="w-full mt-3 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
             />
-            <button onClick={handleJoinChannel}>Join Channel</button>
-            {error && <p className="error-message">{error}</p>}
+            <button
+              onClick={handleJoinChannel}
+              className="w-full mt-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-700"
+            >
+              Join Channel
+            </button>
+            {error && <p className="mt-2 text-red-500">{error}</p>}
           </div>
         )}
-      </div>
 
-      {showDesignPopup && (
-        <DesignProfilePicPopup onClose={handleCloseDesignPopup} />
-      )}
+        {showDesignPopup && (
+          <DesignProfilePicPopup onClose={handleCloseDesignPopup} />
+        )}
+      </div>
     </div>
   );
 };

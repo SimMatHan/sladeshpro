@@ -1,8 +1,7 @@
 // src/pages/Hub.js
 import React, { useEffect, useState } from 'react';
 import { auth, db } from '../firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, setDoc } from 'firebase/firestore'; // Tilføjet setDoc her
-import './Hub.css';
+import { collection, doc, getDoc, getDocs, query, where, setDoc } from 'firebase/firestore';
 
 const Hub = () => {
    const [checkedInMembers, setCheckedInMembers] = useState([]); // Liste af medlemmer som er checket ind
@@ -79,7 +78,7 @@ const Hub = () => {
          const sladeshRef = doc(collection(db, `users/${member.uid}/sladesh`)); // Opretter et nyt dokument i modtagerens `sladesh` subcollection
          await setDoc(sladeshRef, {
             from: auth.currentUser.displayName || "Anonymous",
-            sent: new Date().toISOString(), // Registrerer tidspunktet for afsendelse
+            sent: new Date().toISOString(),
          });
          alert(`Sladesh sent to ${member.userName}!`);
       } catch (error) {
@@ -89,38 +88,40 @@ const Hub = () => {
    };
 
    return (
-      <div className="hub-container">
-         <h1>Welcome to the Hub</h1>
-         <p>Here you can connect with others in your channel.</p>
+      <div className="px-4 py-6 text-center">
+         <h1 className="text-2xl font-semibold mb-4">Welcome to the Hub</h1>
+         <p className="text-gray-600">Connect with others in your channel.</p>
 
-         <h2>Checked-in Members</h2>
-         <ul className="checked-in-members-list">
+         <h2 className="mt-6 text-lg font-medium text-gray-700">Checked-in Members</h2>
+         <ul className="mt-4 space-y-4">
             {checkedInMembers.length > 0 ? (
                checkedInMembers.map((member) => (
                   <li
                      key={member.uid}
-                     className="checked-in-member-item"
+                     className="bg-gray-100 p-4 rounded-lg shadow-md hover:bg-gray-200 cursor-pointer"
                      onClick={() => handleMemberClick(member)}
                   >
-                     {member.userName}
-                     {selectedMember && selectedMember.uid === member.uid && (
-                        <button
-                           className="send-sladesh-button"
-                           onClick={() => handleSendSladesh(member)}
-                        >
-                           Send Sladesh
-                        </button>
-                     )}
+                     <div className="flex items-center justify-between">
+                        <span className="text-gray-800 font-semibold">{member.userName}</span>
+                        {selectedMember && selectedMember.uid === member.uid && (
+                           <button
+                              className="ml-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                              onClick={() => handleSendSladesh(member)}
+                           >
+                              Send Sladesh
+                           </button>
+                        )}
+                     </div>
                   </li>
                ))
             ) : (
-               <p>No members are currently checked in.</p>
+               <p className="text-gray-500">No members are currently checked in.</p>
             )}
          </ul>
 
-         <h2>Received Sladesh</h2>
-         {/* You can add code here to display received Sladesh if needed */}
-         <p>No Sladesh received yet.</p>
+         <h2 className="mt-8 text-lg font-medium text-gray-700">Received Sladesh</h2>
+         {/* Placeholder for received Sladesh */}
+         <p className="mt-2 text-gray-500">No Sladesh received yet.</p>
       </div>
    );
 };

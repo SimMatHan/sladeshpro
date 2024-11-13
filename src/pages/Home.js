@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 import GuidePopup from '../components/GuidePopup';
-import './Home.css';
 
 const drinkOptions = [
     { type: 'beer', icon: '🍺' },
@@ -139,21 +138,21 @@ const Home = () => {
     };
 
     return (
-        <div className="home-container">
-            <h1>Welcome to SladeshPro!</h1>
-            <p>Track your hydration and stay on top of your goals.</p>
-            <p>Navigate through the app to explore your stats, challenges, and more.</p>
+        <div className="text-center p-5">
+            <h1 className="text-2xl font-semibold mb-4">Welcome to SladeshPro!</h1>
+            <p className="text-gray-600">Track your hydration and stay on top of your goals.</p>
+            <p className="text-gray-600 mb-5">Navigate through the app to explore your stats, challenges, and more.</p>
 
             <button 
                 onClick={handleCheckIn} 
-                className="check-in-button" 
+                className={`w-full py-3 rounded-lg text-white font-semibold transition-all ${isCheckedIn ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500"}`}
                 disabled={isCheckedIn}
             >
                 {isCheckedIn ? "You are checked in" : "Check In"}
             </button>
 
             {checkInMessage && (
-                <p className={`check-in-message ${isErrorMessage ? 'error-message' : ''}`}>
+                <p className={`mt-3 text-sm ${isErrorMessage ? 'text-red-600 font-bold' : 'text-gray-800'}`}>
                     {checkInMessage}
                 </p>
             )}
@@ -162,27 +161,28 @@ const Home = () => {
                 <GuidePopup onClose={handleCloseGuide} onDoNotShowAgain={handleDoNotShowAgain} />
             )}
 
-            {/* Drink Tracking Section */}
-            <div className="drink-monitor-panel">
-                <h2>Track Your Drinks</h2>
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-3">Track Your Drinks</h2>
 
-                <div className="drink-grid">
+                <div className="grid grid-cols-2 gap-4">
                     {drinkOptions.map((drink) => (
-                        <div key={drink.type} className="drink-item-card">
-                            <span className="drink-icon">{drink.icon}</span>
-                            <button onClick={() => handleSubtractDrink(drink.type)} className="drink-control-button">-</button>
-                            <span className="drink-count">{drinks[drink.type] || 0}</span>
-                            <button onClick={() => handleAddDrink(drink.type)} className="drink-control-button">+</button>
+                        <div key={drink.type} className="bg-white p-3 rounded-lg shadow-md flex flex-col items-center">
+                            <span className="text-3xl mb-1">{drink.icon}</span>
+                            <div className="flex items-center space-x-2">
+                                <button onClick={() => handleSubtractDrink(drink.type)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">-</button>
+                                <span className="text-lg font-semibold">{drinks[drink.type] || 0}</span>
+                                <button onClick={() => handleAddDrink(drink.type)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">+</button>
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="drink-total">Total Drinks: {totalDrinks}</div>
+                <div className="mt-5 text-lg font-semibold">Total Drinks: {totalDrinks}</div>
 
                 {popupVisible && (
-                    <div className="popup-message">
+                    <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white p-3 rounded-lg shadow-lg text-center">
                         <p>{popupMessage}</p>
-                        <button onClick={() => setPopupVisible(false)}>OK</button>
+                        <button onClick={() => setPopupVisible(false)} className="mt-2 px-4 py-2 bg-blue-500 rounded hover:bg-blue-600">OK</button>
                     </div>
                 )}
             </div>

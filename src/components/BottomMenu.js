@@ -1,9 +1,7 @@
-// src/components/BottomMenu.js
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { db, auth } from "../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
-import './BottomMenu.css';
 
 import DrinkFilled from '../assets/DrinkFilled.svg';
 import Drink from '../assets/Drink.svg';
@@ -11,7 +9,7 @@ import LeaderboardFilled from '../assets/LeaderboardFilled.svg';
 import Leaderboard from '../assets/Leaderboard.svg';
 import SendFilled from '../assets/SendFilled.svg';
 import Send from '../assets/Send.svg';
-import ProfileIcon from '../assets/Profile.svg'; // Standardikon
+import ProfileIcon from '../assets/Profile.svg';
 
 const BottomMenu = () => {
   const location = useLocation();
@@ -27,7 +25,7 @@ const BottomMenu = () => {
 
         if (userDoc.exists()) {
           const data = userDoc.data();
-          setProfileImageUrl(data.profileImageUrl || null); // Hvis intet billede, sætter vi null
+          setProfileImageUrl(data.profileImageUrl || null);
           setProfileBackgroundColor(data.profileBackgroundColor || "linear-gradient(135deg, #f0f0f0, #f0f0f0)");
         }
       }
@@ -37,68 +35,32 @@ const BottomMenu = () => {
   }, []);
 
   return (
-    <nav className="bottom-menu">
-      <ul>
-        <li className={location.pathname === '/home' ? 'active' : ''}>
-          <Link to="/home">
-            <img 
-              src={location.pathname === '/home' ? DrinkFilled : Drink} 
-              alt="Home" 
-              className="nav-icon"
-            />
-            <span>Home</span>
-          </Link>
-        </li>
-        <li className={location.pathname === '/hub' ? 'active' : ''}>
-          <Link to="/hub">
-            <img 
-              src={location.pathname === '/hub' ? SendFilled : Send} 
-              alt="Hub" 
-              className="nav-icon"
-            />
-            <span>Sladesh</span>
-          </Link>
-        </li>
-        <li className={location.pathname === '/overview' ? 'active' : ''}>
-          <Link to="/overview">
-            <img 
-              src={location.pathname === '/overview' ? LeaderboardFilled : Leaderboard} 
-              alt="Overview" 
-              className="nav-icon"
-            />
-            <span>Overview</span>
-          </Link>
-        </li>
-        <li className={location.pathname === '/profile' ? 'active' : ''}> {/* Profil-knappen med brugerdefineret billede eller standardikon */}
-          <Link to="/profile">
-            {profileImageUrl ? (
-              <div
-                className="profile-icon"
-                style={{
-                  background: profileBackgroundColor,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  fontSize: '24px',
-                  overflow: 'hidden'
-                }}
-              >
-                <span className="avatar-emoji">{profileImageUrl}</span>
-              </div>
-            ) : (
-              <img 
-                src={ProfileIcon} 
-                alt="Profile" 
-                className="nav-icon"
-              />
-            )}
-            <span>Profile</span>
-          </Link>
-        </li>
-      </ul>
+    <nav className="fixed bottom-0 inset-x-0 bg-white shadow-lg flex justify-around py-2 z-50">
+      <Link to="/home" className="flex flex-col items-center mb-2">
+        <img src={location.pathname === '/home' ? DrinkFilled : Drink} alt="Home" className="h-6 w-6" />
+        <span className="text-xs text-gray-600">Home</span>
+      </Link>
+      <Link to="/hub" className="flex flex-col items-center mb-2">
+        <img src={location.pathname === '/hub' ? SendFilled : Send} alt="Hub" className="h-6 w-6" />
+        <span className="text-xs text-gray-600">Sladesh</span>
+      </Link>
+      <Link to="/overview" className="flex flex-col items-center mb-2">
+        <img src={location.pathname === '/overview' ? LeaderboardFilled : Leaderboard} alt="Overview" className="h-6 w-6" />
+        <span className="text-xs text-gray-600">Overview</span>
+      </Link>
+      <Link to="/profile" className="flex flex-col items-center mb-2">
+        {profileImageUrl ? (
+          <div
+            className="w-6 h-6 rounded-full flex items-center justify-center"
+            style={{ background: profileBackgroundColor }}
+          >
+            <span className="text-lg">{profileImageUrl}</span>
+          </div>
+        ) : (
+          <img src={ProfileIcon} alt="Profile" className="h-6 w-6" />
+        )}
+        <span className="text-xs text-gray-600">Profile</span>
+      </Link>
     </nav>
   );
 };

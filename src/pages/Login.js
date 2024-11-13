@@ -6,7 +6,6 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "fire
 import { db } from "../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,7 +20,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/home");  // Redirect til forsiden når brugeren er logget ind
+      navigate("/home");
     }
   }, [user, navigate]);
 
@@ -83,18 +82,18 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <h1>Welcome to SladeshPro!</h1>
-      <div className="welcome-text">
+    <div className="max-w-sm mx-auto p-6 shadow-lg rounded-lg bg-white text-center">
+      <h1 className="text-3xl font-bold text-blue-600 mb-2">Welcome to SladeshPro!</h1>
+      <div className="text-gray-500 mb-6">
         Track your hydration, reach your goals, and stay consistent with SladeshPro.
       </div>
       
-      <h2>{isRegistering ? "Register" : "Login"}</h2>
+      <h2 className="text-2xl font-semibold mb-4">{isRegistering ? "Register" : "Login"}</h2>
 
-      {message && <p className="success-message">{message}</p>}
-      {error && <p className="error-message">{error}</p>}
+      {message && <p className="text-green-600 mb-4">{message}</p>}
+      {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <form onSubmit={isRegistering ? handleRegister : handleLogin}>
+      <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-4">
         {isRegistering && (
           <input
             type="text"
@@ -102,6 +101,7 @@ const Login = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            className="w-full p-3 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring focus:ring-blue-200"
           />
         )}
         <input
@@ -110,6 +110,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full p-3 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring focus:ring-blue-200"
         />
         <input
           type="password"
@@ -117,13 +118,24 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="w-full p-3 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring focus:ring-blue-200"
         />
-        <button type="submit">{isRegistering ? "Register" : "Login"}</button>
+        <button
+          type="submit"
+          className="w-full py-3 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 transition duration-300"
+        >
+          {isRegistering ? "Register" : "Login"}
+        </button>
       </form>
 
-      <p>{isRegistering ? "Already have an account?" : "Don't have an account?"}</p>
+      <p className="mt-4 text-gray-600">
+        {isRegistering ? "Already have an account?" : "Don't have an account?"}
+      </p>
       <p>
-        <button onClick={() => setIsRegistering(!isRegistering)}>
+        <button
+          onClick={() => setIsRegistering(!isRegistering)}
+          className="text-blue-500 font-semibold hover:text-blue-600 transition duration-200"
+        >
           {isRegistering ? "Login" : "Register"}
         </button>
       </p>
