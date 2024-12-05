@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { db } from "../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Login = () => {
@@ -28,31 +28,58 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setMessage("");
-
+  
     if (password.length < 6) {
       setError("Password should be at least 6 characters.");
       return;
     }
-
+  
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
+  
+      // Add the user to the Firestore "users" collection
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         username: username,
         uid: user.uid,
         createdAt: new Date().toISOString(),
-        showGuide: true
+        showGuide: true,
+        isCheckedIn: false,
+        drinks: {},
+        totalDrinks: 0,
+        lastLocation: null,
       });
-
+  
+      // Add the user to the default channel
+      const defaultChannelId = "DenAbneKanal";
+      const defaultChannelRef = doc(db, "channels", defaultChannelId);
+      const defaultChannelSnap = await getDoc(defaultChannelRef);
+  
+      if (defaultChannelSnap.exists()) {
+        const defaultChannelData = defaultChannelSnap.data();
+        await updateDoc(defaultChannelRef, {
+          members: defaultChannelData.members
+            ? [...defaultChannelData.members, user.uid]
+            : [user.uid],
+        });
+      } else {
+        // Create the default channel if it doesn't exist
+        await setDoc(defaultChannelRef, {
+          name: "Den Åbne Kanal",
+          members: [user.uid],
+          accessCode: "0000",
+          createdAt: new Date().toISOString(),
+        });
+      }
+  
       setMessage("Registration successful!");
       navigate("/home");
     } catch (error) {
       console.error("Registration error:", error);
       setError("An error occurred during registration. Please try again.");
     }
-  };
+  };  
 
   const handleLogin = async (e) => {
     e.preventDefault();

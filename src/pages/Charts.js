@@ -1,6 +1,5 @@
 // src/pages/Charts.js
 import React from 'react';
-import './Charts.css';
 
 const Charts = () => {
    return (

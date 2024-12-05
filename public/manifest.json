@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "SladeshPro",
+  "name": "SladeshPro - The Ultimate App",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +18,14 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#0d6efd",
+  "background_color": "#ffffff",
+  "description": "SladeshPro: A feature-rich app for communication and notifications.",
+  "gcm_sender_id": "818619367245",
+  "gcm_user_visible_only": true,
+  "categories": ["productivity", "social", "utilities"],
+  "orientation": "portrait-primary"
 }

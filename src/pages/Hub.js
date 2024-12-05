@@ -1,129 +1,545 @@
-// src/pages/Hub.js
-import React, { useEffect, useState } from 'react';
-import { auth, db } from '../firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, setDoc } from 'firebase/firestore';
+import React, { useEffect, useState, useCallback } from "react";
+import { auth, db } from "../firebaseConfig";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import Confirmation from "../components/Confirmation";
+import SendSladeshDialog from "../components/SendSladeshDialog";
 
-const Hub = () => {
-   const [checkedInMembers, setCheckedInMembers] = useState([]); // Liste af medlemmer som er checket ind
-   const [selectedMember, setSelectedMember] = useState(null); // Gemmer valgt medlem for at sende Sladesh
+const Hub = ({ activeChannel }) => {
+  const [activeTab, setActiveTab] = useState("Active");
+  const [checkedInMembers, setCheckedInMembers] = useState([]);
+  const [expandedMemberId, setExpandedMemberId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [sentSladesh, setSentSladesh] = useState([]);
+  const [receivedSladesh, setReceivedSladesh] = useState([]);
+  const [hasNewSladesh, setHasNewSladesh] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [currentSladesh, setCurrentSladesh] = useState(null);
+  const [isGyroscopeEnabled, setIsGyroscopeEnabled] = useState(false);
+  const [showSendSladeshDialog, setShowSendSladeshDialog] = useState(false);
+  const [sladeshConfirmation, setSladeshConfirmation] = useState("");
 
-   useEffect(() => {
-      const fetchUserChannel = async () => {
-         const user = auth.currentUser;
+  const fetchCheckedInMembers = async (channelId) => {
+    try {
+      const currentUserId = auth.currentUser?.uid;
+      if (!currentUserId) throw new Error("User not authenticated");
 
-         if (user) {
-            try {
-               const channelsSnapshot = await getDocs(collection(db, 'channels'));
+      // Hent currentUser's lastSladeshTimestamp
+      const currentUserRef = doc(db, `users/${currentUserId}`);
+      const currentUserDoc = await getDoc(currentUserRef);
+      let currentUserCanSendSladesh = true;
 
-               let userChannelId = null;
-               for (const channelDoc of channelsSnapshot.docs) {
-                  const membersRef = collection(db, `channels/${channelDoc.id}/members`);
-                  const memberQuery = query(membersRef, where("userUID", "==", user.uid));
-                  const memberSnapshot = await getDocs(memberQuery);
+      if (currentUserDoc.exists()) {
+        const currentUserData = currentUserDoc.data();
+        const lastSladeshTimestamp = currentUserData.lastSladeshTimestamp
+          ? new Date(currentUserData.lastSladeshTimestamp)
+          : null;
 
-                  if (!memberSnapshot.empty) {
-                     userChannelId = channelDoc.id;
-                     break;
-                  }
-               }
-
-               if (userChannelId) {
-                  await fetchCheckedInMembers(userChannelId, user.uid);
-               } else {
-                  console.log("User is not a member of any channel.");
-               }
-            } catch (error) {
-               console.error("Error fetching user channel:", error);
-            }
-         }
-      };
-
-      const fetchCheckedInMembers = async (channelId, currentUserId) => {
-         try {
-            const membersRef = collection(db, `channels/${channelId}/members`);
-            const membersSnapshot = await getDocs(membersRef);
-
-            const checkedInMembersData = [];
-            for (const memberDoc of membersSnapshot.docs) {
-               const memberData = memberDoc.data();
-               const userDocRef = doc(db, "users", memberData.userUID);
-               const userDoc = await getDoc(userDocRef);
-
-               if (userDoc.exists()) {
-                  const userData = userDoc.data();
-                  if (userData.isCheckedIn && memberData.userUID !== currentUserId) {
-                     checkedInMembersData.push({
-                        uid: memberData.userUID,
-                        userName: userData.username || "Unknown User",
-                     });
-                  }
-               }
-            }
-
-            setCheckedInMembers(checkedInMembersData);
-         } catch (error) {
-            console.error("Error fetching checked-in members:", error);
-         }
-      };
-
-      fetchUserChannel();
-   }, []);
-
-   const handleMemberClick = (member) => {
-      setSelectedMember(member.uid === selectedMember ? null : member); // Vælg eller fravælg medlem
-   };
-
-   const handleSendSladesh = async (member) => {
-      try {
-         const sladeshRef = doc(collection(db, `users/${member.uid}/sladesh`)); // Opretter et nyt dokument i modtagerens `sladesh` subcollection
-         await setDoc(sladeshRef, {
-            from: auth.currentUser.displayName || "Anonymous",
-            sent: new Date().toISOString(),
-         });
-         alert(`Sladesh sent to ${member.userName}!`);
-      } catch (error) {
-         console.error("Error sending Sladesh:", error);
-         alert("Failed to send Sladesh.");
+        const currentTime = new Date();
+        currentUserCanSendSladesh =
+          !lastSladeshTimestamp ||
+          (currentTime - lastSladeshTimestamp) / (1000 * 60 * 60) >= 12; // 12-timers tjek
       }
-   };
 
-   return (
-      <div className="px-4 py-6 text-center">
-         <h1 className="text-2xl font-semibold mb-4">Welcome to the Hub</h1>
-         <p className="text-gray-600">Connect with others in your channel.</p>
+      const membersRef = collection(db, `channels/${channelId}/members`);
+      const membersSnapshot = await getDocs(membersRef);
 
-         <h2 className="mt-6 text-lg font-medium text-gray-700">Checked-in Members</h2>
-         <ul className="mt-4 space-y-4">
-            {checkedInMembers.length > 0 ? (
-               checkedInMembers.map((member) => (
-                  <li
-                     key={member.uid}
-                     className="bg-gray-100 p-4 rounded-lg shadow-md hover:bg-gray-200 cursor-pointer"
-                     onClick={() => handleMemberClick(member)}
-                  >
-                     <div className="flex items-center justify-between">
-                        <span className="text-gray-800 font-semibold">{member.userName}</span>
-                        {selectedMember && selectedMember.uid === member.uid && (
-                           <button
-                              className="ml-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                              onClick={() => handleSendSladesh(member)}
-                           >
-                              Send Sladesh
-                           </button>
-                        )}
-                     </div>
-                  </li>
-               ))
-            ) : (
-               <p className="text-gray-500">No members are currently checked in.</p>
-            )}
-         </ul>
+      const checkedInMembersData = [];
+      for (const memberDoc of membersSnapshot.docs) {
+        const memberData = memberDoc.data();
 
-         <h2 className="mt-8 text-lg font-medium text-gray-700">Received Sladesh</h2>
-         {/* Placeholder for received Sladesh */}
-         <p className="mt-2 text-gray-500">No Sladesh received yet.</p>
+        if (!memberData.userUID) {
+          console.warn(`Member document missing userUID: ${memberDoc.id}`);
+          continue;
+        }
+
+        // Filtrer kun checked-in members og undgå den authenticated user
+        if (memberData.userUID !== currentUserId) {
+          const userDocRef = doc(db, `users/${memberData.userUID}`);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.isCheckedIn) {
+              checkedInMembersData.push({
+                uid: memberData.userUID,
+                userName: userData.username || "Unknown User",
+                canSendSladesh: currentUserCanSendSladesh, // Brug status for currentUser
+              });
+            }
+          }
+        }
+      }
+
+      setCheckedInMembers(checkedInMembersData);
+    } catch (error) {
+      console.error("Error fetching checked-in members:", error);
+    }
+  };
+
+
+  const fetchSentSladesh = useCallback(async () => {
+    try {
+      const currentUserId = auth.currentUser?.uid;
+      if (!currentUserId || !activeChannel) throw new Error("User not authenticated or no active channel");
+
+      const sentRef = collection(db, `users/${currentUserId}/sladeshSent`);
+      const sentSnapshot = await getDocs(sentRef);
+
+      const sentData = await Promise.all(
+        sentSnapshot.docs.map(async (sentDoc) => {
+          const sladesh = { id: sentDoc.id, ...sentDoc.data() };
+
+          // Ensure the sladesh matches the active channel
+          if (sladesh.channelId !== activeChannel) {
+            return null;
+          }
+
+          // Check completion status from recipient's Sladesh document
+          const receiverSladeshRef = doc(db, `users/${sladesh.toUID}/sladesh/${sladesh.id}`);
+          const receiverSladeshDoc = await getDoc(receiverSladeshRef);
+
+          sladesh.completed = receiverSladeshDoc.exists() && receiverSladeshDoc.data().completed;
+          return sladesh;
+        })
+      );
+
+      setSentSladesh(
+        sentData.filter(Boolean).sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt))
+      );
+    } catch (error) {
+      console.error("Error fetching sent Sladesh:", error);
+    }
+  }, [activeChannel]);
+
+  const fetchReceivedSladesh = useCallback(async () => {
+    try {
+      const currentUserId = auth.currentUser?.uid;
+      if (!currentUserId || !activeChannel) throw new Error("User not authenticated or no active channel");
+
+      const receivedRef = collection(db, `users/${currentUserId}/sladesh`);
+      const receivedSnapshot = await getDocs(receivedRef);
+
+      const receivedData = (
+        await Promise.all(
+          receivedSnapshot.docs.map(async (docSnap) => {
+            const sladesh = { id: docSnap.id, ...docSnap.data() };
+
+            // Ensure the sladesh matches the active channel
+            if (sladesh.channelId !== activeChannel) {
+              return null;
+            }
+
+            // Fetch sender's username if missing or fallback to "Anonymous"
+            if (sladesh.fromUID) {
+              const senderDocRef = doc(db, "users", sladesh.fromUID);
+              const senderDoc = await getDoc(senderDocRef);
+              sladesh.fromName = senderDoc.exists()
+                ? senderDoc.data().username || "Anonymous"
+                : "Anonymous";
+            } else {
+              sladesh.fromName = "Anonymous";
+            }
+
+            return sladesh;
+          })
+        )
+      ).filter(Boolean).sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+
+      setReceivedSladesh(receivedData);
+
+      // Update "New" notification status
+      const hasNew = receivedData.some((sladesh) => !sladesh.completed);
+      setHasNewSladesh(hasNew);
+    } catch (error) {
+      console.error("Error fetching received Sladesh:", error);
+    }
+  }, [activeChannel]);
+
+
+  const handleMemberClick = (member) => {
+    if (expandedMemberId === member.uid) {
+      // Fjern gyroskop-monitorering, hvis medlemmet fravælges
+      setExpandedMemberId(null);
+      stopGyroscopeMonitoring(); // Stop gyroskop-monitorering
+      setMessage("");
+    } else {
+      // Start gyroskop-monitorering, hvis medlemmet vælges
+      setExpandedMemberId(member.uid);
+      requestGyroscopePermission(); // Bed om tilladelse til gyroskop
+      setMessage("");
+    }
+  };
+
+
+  const handleSendSladesh = async (member) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !activeChannel)
+        throw new Error("User not authenticated or no active channel");
+  
+      const senderUID = currentUser.uid;
+      const senderDocRef = doc(db, "users", senderUID);
+      const senderDoc = await getDoc(senderDocRef);
+  
+      if (!senderDoc.exists()) {
+        throw new Error("Sender data not found in Firestore");
+      }
+  
+      const senderData = senderDoc.data();
+      const senderName = senderData.username || "Anonymous";
+  
+      const currentTime = new Date();
+      const sladeshId = `${Date.now()}-${member.uid}`;
+  
+      const receiverSladeshRef = doc(
+        db,
+        `users/${member.uid}/sladesh/${sladeshId}`
+      );
+      await setDoc(receiverSladeshRef, {
+        id: sladeshId,
+        fromUID: senderUID,
+        fromName: senderName,
+        channelId: activeChannel,
+        message: message,
+        sentAt: currentTime.toISOString(),
+        completed: false,
+      });
+  
+      const senderSladeshRef = doc(
+        db,
+        `users/${senderUID}/sladeshSent/${sladeshId}`
+      );
+      await setDoc(senderSladeshRef, {
+        id: sladeshId,
+        toUID: member.uid,
+        toName: member.userName,
+        channelId: activeChannel,
+        message: message,
+        sentAt: currentTime.toISOString(),
+      });
+  
+      const notificationRef = doc(collection(db, "notifications"));
+      await setDoc(notificationRef, {
+        channelId: activeChannel,
+        recipientUID: member.uid,
+        message: `${senderName} has sent a Sladesh to ${member.userName}`,
+        timestamp: currentTime,
+        watched: false,
+      });
+  
+      await updateDoc(senderDocRef, {
+        lastSladeshTimestamp: currentTime.toISOString(),
+      });
+  
+      setSladeshConfirmation(`Sladesh successfully sent to ${member.userName}! 🎉`);
+      setTimeout(() => {
+        setSladeshConfirmation(""); // Clear confirmation message after 5 seconds
+      }, 3000);
+  
+      setMessage("");
+      setExpandedMemberId(null);
+    } catch (error) {
+      console.error("Error sending Sladesh:", error);
+      setSladeshConfirmation("Failed to send Sladesh. Please try again.");
+      setTimeout(() => {
+        setSladeshConfirmation(""); // Clear error message after 5 seconds
+      }, 3000);
+    }
+  };
+  
+  const handleCompleteSladesh = (sladeshId, fromUID) => {
+    setCurrentSladesh({ sladeshId, fromUID });
+    setShowConfirmation(true);
+  };
+
+  const confirmCompleteSladesh = async () => {
+    try {
+      const { sladeshId, fromUID } = currentSladesh;
+      const currentUserId = auth.currentUser?.uid;
+
+      if (!currentUserId) throw new Error("User not authenticated");
+
+      const sladeshRef = doc(db, `users/${currentUserId}/sladesh/${sladeshId}`);
+      const senderSladeshRef = doc(
+        db,
+        `users/${fromUID}/sladeshSent/${sladeshId}`
+      );
+
+      const sladeshDoc = await getDoc(sladeshRef);
+      const senderDoc = await getDoc(senderSladeshRef);
+
+      if (!sladeshDoc.exists() || !senderDoc.exists()) {
+        throw new Error(
+          `Document does not exist: sladeshId ${sladeshId} or fromUID ${fromUID}`
+        );
+      }
+
+      // Update Firestore
+      await updateDoc(sladeshRef, { completed: true });
+      await updateDoc(senderSladeshRef, { completed: true });
+
+      fetchReceivedSladesh();
+      alert("Sladesh completed!");
+    } catch (error) {
+      console.error("Error completing Sladesh:", error);
+      alert("Failed to complete Sladesh.");
+    } finally {
+      setShowConfirmation(false);
+      setCurrentSladesh(null);
+    }
+  };
+
+  const handleGyroscope = (event) => {
+    const beta = event.beta !== null ? event.beta : 0; // Registrer hældning
+    if (beta < -15) { // Justér vinklen efter behov
+      console.log("Gyroscope detected tilt, triggering Sladesh!");
+      stopGyroscopeMonitoring(); // Stop gyroskopet, når Sladesh aktiveres
+
+      // Trigger Sladesh, hvis et medlem er valgt
+      if (expandedMemberId) {
+        const selectedMember = checkedInMembers.find(
+          (member) => member.uid === expandedMemberId
+        );
+        if (selectedMember) {
+          handleSendSladesh(selectedMember);
+        }
+      }
+    }
+  };
+
+  const startGyroscopeMonitoring = () => {
+    if (window.DeviceOrientationEvent) {
+      console.log("Gyroscope monitoring started.");
+      window.addEventListener("deviceorientation", handleGyroscope, true);
+      setIsGyroscopeEnabled(true);
+    } else {
+      console.error("Gyroscope is not supported on this device.");
+    }
+  };
+
+  const stopGyroscopeMonitoring = () => {
+    window.removeEventListener("deviceorientation", handleGyroscope);
+    setIsGyroscopeEnabled(false);
+  };
+
+  const requestGyroscopePermission = async () => {
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      try {
+        const response = await DeviceOrientationEvent.requestPermission();
+        if (response === "granted") {
+          startGyroscopeMonitoring();
+        } else {
+          console.error("Permission not granted for DeviceOrientationEvent.");
+        }
+      } catch (error) {
+        console.error("Error requesting gyroscope permission:", error);
+      }
+    } else {
+      startGyroscopeMonitoring();
+    }
+  };
+
+  useEffect(() => {
+    if (activeChannel) {
+      fetchCheckedInMembers(activeChannel);
+    }
+  }, [activeChannel]);
+
+  useEffect(() => {
+    // Stop gyroskop-monitorering ved unmount
+    return () => {
+      stopGyroscopeMonitoring();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "Sent") {
+      fetchSentSladesh();
+    } else if (activeTab === "Inbox") {
+      fetchReceivedSladesh();
+    }
+  }, [activeTab, fetchSentSladesh, fetchReceivedSladesh]);
+
+  return (
+    <div className="p-2">
+      {sladeshConfirmation && (
+        <div className="mb-4 text-center text-green-500 font-semibold">
+          {sladeshConfirmation}
+        </div>
+      )}
+      {showSendSladeshDialog && (
+        <SendSladeshDialog
+          onClose={() => {
+            setShowSendSladeshDialog(false);
+            stopGyroscopeMonitoring();
+          }}
+          onSladeshSent={() => {
+            const selectedMember = checkedInMembers.find(
+              (member) => member.uid === expandedMemberId
+            );
+            if (selectedMember) {
+              handleSendSladesh(selectedMember); // Udløs send
+            }
+            setSladeshConfirmation("Sladesh successfully sent! 🎉");
+          }}
+          message={message} // Pass the error or success message
+        />
+      )}
+      {showConfirmation && (
+        <Confirmation
+          title="Confirm Completion"
+          message="Are you sure you want to confirm the drink is completed?"
+          onConfirm={confirmCompleteSladesh}
+          onCancel={() => setShowConfirmation(false)}
+        />
+      )}
+      {/* Tab Navigation */}
+      <div className="flex justify-around border-b mb-6">
+        <button
+          onClick={() => setActiveTab("Active")}
+          className={`flex-1 py-2 text-center ${activeTab === "Active"
+            ? "border-b-4 border-blue-600 text-blue-600 font-semibold"
+            : "text-gray-600"
+            }`}
+        >
+          Active
+        </button>
+        <button
+          onClick={() => setActiveTab("Sent")}
+          className={`flex-1 py-2 text-center ${activeTab === "Sent"
+            ? "border-b-4 border-blue-600 text-blue-600 font-semibold"
+            : "text-gray-600"
+            }`}
+        >
+          Sent
+        </button>
+        <button
+          onClick={() => setActiveTab("Inbox")}
+          className={`flex-1 py-2 text-center relative ${activeTab === "Inbox"
+            ? "border-b-4 border-blue-600 text-blue-600 font-semibold"
+            : "text-gray-600"
+            }`}
+        >
+          Inbox
+          {hasNewSladesh && (
+            <span className="absolute top-0 right-3 bg-red-500 text-white text-xs rounded-full px-2">
+              New
+            </span>
+          )}
+        </button>
       </div>
-   );
+
+      {/* Tab Content */}
+      <div>
+        {activeTab === "Active" && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">
+              Checked-in Members
+            </h2>
+            <ul className="space-y-4">
+              {checkedInMembers.map((member) => (
+                <li
+                  key={member.uid}
+                  className="bg-gray-100 p-4 rounded-lg shadow-md flex items-center justify-between"
+                >
+                  <span className="text-gray-800 font-semibold">{member.userName}</span>
+                  <button
+                    onClick={() => {
+                      if (member.canSendSladesh) {
+                        setExpandedMemberId(member.uid);
+                        setShowSendSladeshDialog(true);
+                      }
+                    }}
+                    disabled={!member.canSendSladesh} // Disable if Sladesh already used
+                    className={`py-2 px-4 rounded-lg ${member.canSendSladesh
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                      }`}
+                  >
+                    {member.canSendSladesh ? "Send Sladesh" : "Sladesh Used"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+
+          </div>
+        )}
+
+        {activeTab === "Sent" && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">
+              Sent Sladeshes
+            </h2>
+            <ul className="space-y-4">
+              {sentSladesh.map((sladesh) => (
+                <li
+                  key={sladesh.id}
+                  className="bg-gray-100 p-4 rounded-lg shadow-md"
+                >
+                  <p className="text-gray-800 font-semibold">
+                    To: {sladesh.toName}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Sent at: {new Date(sladesh.sentAt).toLocaleString()}
+                  </p>
+                  <p
+                    className={`mt-2 font-semibold ${sladesh.completed ? "text-green-500" : "text-gray-500"
+                      }`}
+                  >
+                    {sladesh.completed ? "Completed" : "Not Completed"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {activeTab === "Inbox" && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">
+              Received Sladeshes
+            </h2>
+            <ul className="space-y-4">
+              {receivedSladesh.map((sladesh) => (
+                <li
+                  key={sladesh.id}
+                  className="bg-gray-100 p-4 rounded-lg shadow-md"
+                >
+                  <p className="text-gray-800 font-semibold">
+                    From: {sladesh.fromName}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Received at: {new Date(sladesh.sentAt).toLocaleString()}
+                  </p>
+                  {!sladesh.completed && (
+                    <button
+                      onClick={() =>
+                        handleCompleteSladesh(sladesh.id, sladesh.fromUID)
+                      }
+                      className="mt-2 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    >
+                      Complete
+                    </button>
+                  )}
+                  {sladesh.completed && (
+                    <span className="text-green-500">Completed</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Hub;

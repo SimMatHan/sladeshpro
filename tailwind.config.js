@@ -5,9 +5,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#2979ff",
-        secondary: "#43a047",
-        muted: "#777",
+        primary: "var(--primary)",
+        secondary: "var(--secondary)",
+        bg: "var(--bg-color)",
+        textMuted: "var(--text-muted)",
+        divider: "var(--divider-color)",
+        highlight: "var(--highlight)",
+        delete: "var(--delete-btn)",
       },
     },
   },

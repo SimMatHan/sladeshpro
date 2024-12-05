@@ -21,10 +21,61 @@ const slides = [
     title: "Track Your Drinks",
     content: "Keep track of each drink you take and see your total count.",
   },
+  {
+    title: "Add to Home Screen",
+    content: (selectedBrowser, setSelectedBrowser) => (
+      <>
+        <p className="text-gray-600 mb-4">
+          Add this website to your home screen for a more native app experience.
+        </p>
+        <div className="flex justify-center space-x-4 mb-4">
+          <button
+            className={`font-bold ${selectedBrowser === 'Safari' ? 'text-blue-600' : 'text-gray-600'}`}
+            onClick={() => setSelectedBrowser('Safari')}
+          >
+            Safari
+          </button>
+          <button
+            className={`font-bold ${selectedBrowser === 'Chrome' ? 'text-blue-600' : 'text-gray-600'}`}
+            onClick={() => setSelectedBrowser('Chrome')}
+          >
+            Chrome
+          </button>
+        </div>
+        {selectedBrowser === 'Safari' ? (
+          <div>
+            <h3 className="font-semibold mb-2">
+              How to Add Website to Home Screen in Safari
+            </h3>
+            <ol className="list-decimal pl-5 text-left">
+              <li>Open Safari on your iPhone.</li>
+              <li>Visit the website.</li>
+              <li>Tap the <strong>Share</strong> button.</li>
+              <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+              <li>If missing, tap <strong>Edit Actions</strong> to add.</li>
+            </ol>
+          </div>
+        ) : (
+          <div>
+            <h3 className="font-semibold mb-2">
+              How to Add Website to Home Screen in Chrome
+            </h3>
+            <ol className="list-decimal pl-5 text-left">
+              <li>Open Chrome on your phone.</li>
+              <li>Visit the website.</li>
+              <li>Tap the three dots in the top-right corner.</li>
+              <li>Tap <strong>Add to Home screen</strong>.</li>
+            </ol>
+          </div>
+        )}
+      </>
+    ),
+  },
 ];
 
 const Onboarding = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedBrowser, setSelectedBrowser] = useState('Safari');
   const navigate = useNavigate();
 
   const handleNext = async () => {
@@ -40,14 +91,17 @@ const Onboarding = () => {
     }
   };
 
+  const currentContent =
+    typeof slides[currentSlide].content === "function"
+      ? slides[currentSlide].content(selectedBrowser, setSelectedBrowser)
+      : slides[currentSlide].content;
+
   return (
     <div className="flex flex-col items-center justify-center h-screen p-6 text-center bg-white">
       <h1 className="text-3xl font-bold text-blue-600 mb-4">
         {slides[currentSlide].title}
       </h1>
-      <p className="text-lg text-gray-600 mb-8">
-        {slides[currentSlide].content}
-      </p>
+      <div className="text-lg text-gray-600 mb-8">{currentContent}</div>
       <button
         onClick={handleNext}
         className="px-6 py-3 bg-blue-600 text-white text-lg rounded-full shadow-md hover:bg-blue-700 transition duration-300"
