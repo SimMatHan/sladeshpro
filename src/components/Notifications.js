@@ -59,35 +59,40 @@ const Notifications = ({ onClose, channelId }) => {
   };
 
   return (
-    <div className="fixed top-[60px] inset-0 flex justify-center items-start z-50">
+    <div className="fixed top-[50px] inset-0 flex justify-center items-start z-50">
       <div
         className="fixed top-[60px] inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       ></div>
-      <div className="bg-white rounded-b-lg shadow-lg w-full md:w-3/4 lg:w-1/2 max-h-[80vh] p-4 mt-0 overflow-hidden transform translate-y-0">
+      <div className="bg-[var(--bg-color)] rounded-b-lg shadow-lg w-full md:w-3/4 lg:w-1/2 max-h-[80vh] p-4 mt-0 overflow-hidden transform translate-y-0">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Notifications</h2>
+          <h2 className="text-lg font-semibold text-[var(--text-color)]">Notifications</h2>
           {notifications.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="text-sm px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              className="py-1 px-3 bg-[var(--delete-btn)] text-white text-sm rounded shadow-md hover:bg-[var(--delete-btn)]/90"
             >
               Clear All
             </button>
           )}
         </div>
-        <div className="overflow-y-auto max-h-[60vh]">
+
+        {/* Notifications List */}
+        <div className="overflow-y-auto max-h-[60vh] space-y-4">
           {notifications.length > 0 ? (
             notifications.map((notification) => (
-              <div key={notification.id} className="p-3 bg-gray-100 rounded-lg shadow-md">
-                <p className="text-gray-800">{notification.message}</p>
-                <span className="text-gray-500 text-sm">
+              <div
+                key={notification.id}
+                className="p-4 bg-[var(--bg-neutral)] rounded-lg shadow-md"
+              >
+                <p className="text-[var(--text-color)]">{notification.message}</p>
+                <span className="text-[var(--text-muted)] text-sm">
                   {new Date(notification.timestamp?.seconds * 1000).toLocaleString()}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-gray-500">No recent notifications.</p>
+            <p className="text-[var(--text-muted)]">No recent notifications.</p>
           )}
         </div>
       </div>

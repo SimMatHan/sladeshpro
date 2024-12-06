@@ -9,7 +9,7 @@
 
 body {
   @apply font-sans text-gray-800 bg-white leading-relaxed;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Roboto', sans-serif;
   color: var(--text-color);
 }
 
@@ -33,6 +33,13 @@ body {
   --font-md: 16px;
   --font-lg: 20px;
   --font-xl: 24px;
+
+  --font-weight-light: 300; /* Let vægt */
+  --font-weight-regular: 400; /* Standard vægt */
+  --font-weight-medium: 500; /* Mellem vægt */
+  --font-weight-semibold: 600; /* Semibold vægt */
+  --font-weight-bold: 700; /* Fed vægt */
+  --font-weight-extrabold: 800; /* Ekstra fed vægt */
 
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -86,7 +93,7 @@ p {
 
 /* Button Styles */
 .button-primary {
-  @apply bg-[var(--primary)] text-white py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
+  @apply bg-[var(--primary)] text-[var(--text-color)] py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
 }
 .button-primary:hover {
   @apply bg-[var(--highlight)];
@@ -96,6 +103,48 @@ p {
   @apply bg-secondary text-white py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
 }
 
+@layer components {
+  .icon-button {
+    @apply w-8 h-8 flex items-center justify-center bg-[var(--secondary)] text-white rounded-full transition;
+  }
+
+  .icon-button:hover {
+    background-color: rgba(22, 51, 0, 0.8); /* Brug rgba for 80% opacity */
+  }
+
+  .icon-button-danger {
+    @apply w-8 h-8 flex items-center justify-center bg-[var(--delete-btn)] text-white rounded-full transition;
+  }
+
+  .icon-button-danger:hover {
+    background-color: rgba(183, 0, 0, 0.8); /* Brug rgba for 80% opacity */
+  }
+}
+
+.button-checkin {
+  @apply py-2 px-4 rounded-lg text-white font-semibold;
+}
+
+.button-checkin-enabled {
+  @apply bg-[var(--primary)] hover:bg-[var(--highlight)];
+}
+
+.button-checkin-disabled {
+  @apply bg-[var(--disabled)] cursor-not-allowed text-[var(--text-muted)];
+}
+
+@layer components {
+  .reset-button {
+    @apply flex items-center justify-center w-16 h-16 bg-[var(--delete-btn)] text-white rounded-full shadow-md transition;
+
+    /* Custom hover styling */
+    &:hover {
+      background-color: rgba(183, 0, 0, 0.9); /* Rød med 90% opacitet */
+    }
+  }
+}
+
+
 /* Notifications Overlay */
 .notification-overlay {
   @apply fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center;
@@ -103,10 +152,15 @@ p {
 
 /* Card Styles */
 .card {
-  @apply bg-white p-4 rounded-lg shadow-lg mb-4 transition duration-300 ease-in-out transform;
+  @apply bg-[var(--bg-neutral)] text-[var(--text-color)] p-4 rounded-lg shadow-md flex justify-between items-center;
 }
 .card:hover {
   @apply scale-105;
+}
+
+.counter {
+  @apply text-4xl;
+  font-weight: var(--font-weight-extrabold);
 }
 
 /* Profile Image */
@@ -116,10 +170,12 @@ p {
 
 /* Text & Heading Styles */
 .heading {
-  @apply text-lg font-semibold text-gray-900 mb-2;
+  @apply text-lg;
+  font-weight: var(--font-weight-semibold); /* Brug variabel til font-weight */
 }
 .subheading {
-  @apply text-sm font-medium text-gray-600;
+  @apply text-sm;
+  font-weight: var(--font-weight-regular);
 }
 .text-muted {
   @apply text-[var(--text-muted)];
@@ -143,4 +199,3 @@ p {
 .divider {
   @apply border-b border-gray-300 my-2;
 }
-

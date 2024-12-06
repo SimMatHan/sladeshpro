@@ -171,47 +171,57 @@ const Comments = ({ onClose, channelId }) => {
 
   return (
     <div className="fixed inset-0 flex justify-center items-start z-40">
+      {/* Overlay */}
       <div
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       ></div>
-
-      <div className="relative z-50 bg-white rounded-b-lg shadow-lg w-full md:w-3/4 lg:w-1/2 max-h-[80vh] p-4 mt-0 overflow-hidden">
+  
+      {/* Comments Container */}
+      <div className="relative z-50 bg-[var(--bg-color)] rounded-b-lg shadow-heavy w-full md:w-3/4 lg:w-1/2 max-h-[80vh] p-4 overflow-hidden">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Comments</h2>
+          <h2 className="text-lg font-semibold text-[var(--text-color)]">
+            Comments
+          </h2>
         </div>
+  
+        {/* Comments List */}
         <div className="overflow-y-auto max-h-[60vh]">
           <div className="mt-4 space-y-4">
             {errorMessage ? (
-              <p className="text-red-600">{errorMessage}</p>
+              <p className="text-[var(--delete-btn)]">{errorMessage}</p>
             ) : comments.length > 0 ? (
               comments.map((comment) => <Comment key={comment.id} comment={comment} />)
             ) : isLoading ? (
-              <p className="text-gray-500">Loading...</p>
+              <p className="text-[var(--text-muted)]">Loading...</p>
             ) : (
-              <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+              <p className="text-[var(--text-muted)]">
+                No comments yet. Be the first to comment!
+              </p>
             )}
           </div>
           {hasMore && <div id="load-more-trigger" className="w-full h-10"></div>}
         </div>
+  
+        {/* Add Comment Input */}
         <div className="mt-4 flex items-center space-x-2">
           <input
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+            className="input px-4 py-2"
           />
           <button
             onClick={handleAddComment}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="button-primary"
           >
             Post
           </button>
         </div>
       </div>
     </div>
-  );
+  );  
 };
 
 export default Comments;

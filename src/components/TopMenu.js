@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, collection, query, where, onSnapshot } from "firebase/firestore"; // Firestore imports
-import { db } from "../firebaseConfig"; // Import Firestore instance
+import { doc, getDoc, collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 import ChannelsIcon from "../assets/ChannelsIcon.svg";
+import ChannelsIconFilled from "../assets/ChannelsIconFilled.svg";
 import NotificationsIcon from "../assets/Notifications.svg";
 import NotificationsFilled from "../assets/NotificationsFilled.svg";
-import CommentsIcon from "../assets/CommentIcon.svg"; // Import Comments icon
+import CommentsIcon from "../assets/CommentIcon.svg";
+import CommentsIconFilled from "../assets/CommentIconFilled.svg";
 import Notifications from "./Notifications";
 import Channels from "./Channels";
 import Comments from "./Comments";
 
 const TopMenu = ({ activeChannel, setActiveChannel }) => {
-  const [unreadCount, setUnreadCount] = useState(0); // Track unread notifications
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showChannelsDropdown, setShowChannelsDropdown] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
-  const [showCommentsDropdown, setShowCommentsDropdown] = useState(false); // New state for Comments
-  const [activeChannelName, setActiveChannelName] = useState("Select Channel"); // Default placeholder
+  const [showCommentsDropdown, setShowCommentsDropdown] = useState(false);
+  const [activeChannelName, setActiveChannelName] = useState("Select Channel");
 
   // Fetch unread notifications count
   useEffect(() => {
@@ -27,15 +29,14 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
       );
 
       const unsubscribe = onSnapshot(unreadQuery, (snapshot) => {
-        setUnreadCount(snapshot.size); // Update unread count in real time
-        console.log(`Unread notifications for channel ${activeChannel}:`, snapshot.size);
+        setUnreadCount(snapshot.size);
       });
 
       return () => unsubscribe();
     }
   }, [activeChannel]);
 
-  // Update the active channel's name whenever activeChannel changes
+  // Fetch active channel name
   useEffect(() => {
     const fetchChannelName = async () => {
       if (activeChannel) {
@@ -47,11 +48,9 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
             const channelData = channelSnap.data();
             setActiveChannelName(channelData.name || "Unnamed Channel");
           } else {
-            console.warn(`Channel with ID ${activeChannel} does not exist.`);
             setActiveChannelName("Unnamed Channel");
           }
-        } catch (error) {
-          console.error("Error fetching channel name:", error);
+        } catch {
           setActiveChannelName("Error Loading Name");
         }
       } else {
@@ -65,60 +64,70 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
   const toggleChannelsDropdown = () => {
     setShowChannelsDropdown((prev) => !prev);
     setShowNotificationsDropdown(false);
-    setShowCommentsDropdown(false); // Close Comments if open
+    setShowCommentsDropdown(false);
   };
 
   const toggleNotificationsDropdown = () => {
     setShowNotificationsDropdown((prev) => !prev);
     setShowChannelsDropdown(false);
-    setShowCommentsDropdown(false); // Close Comments if open
+    setShowCommentsDropdown(false);
   };
 
   const toggleCommentsDropdown = () => {
     setShowCommentsDropdown((prev) => !prev);
     setShowChannelsDropdown(false);
-    setShowNotificationsDropdown(false); // Close Notifications if open
+    setShowNotificationsDropdown(false);
   };
 
   return (
     <>
+      {/* Overlay for Dropdowns */}
       {(showChannelsDropdown || showNotificationsDropdown || showCommentsDropdown) && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => {
             setShowChannelsDropdown(false);
             setShowNotificationsDropdown(false);
-            setShowCommentsDropdown(false); // Close Comments
+            setShowCommentsDropdown(false);
           }}
         ></div>
       )}
 
-      <div className="fixed top-0 inset-x-0 bg-white shadow-md p-4 flex justify-between items-center z-50">
+      {/* Top Menu */}
+      <div className="fixed top-0 inset-x-0 bg-[var(--bg-color)] shadow-heavy p-4 flex justify-between items-center z-50">
+        {/* Channel Name */}
         <div className="flex items-center space-x-4">
-          <span className="text-md font-medium text-gray-700">{activeChannelName}</span>
+          <span className="text-md font-semibold text-[var(--text-color)]">
+            {activeChannelName}
+          </span>
         </div>
 
+        {/* Icons Section */}
         <div className="flex items-center space-x-4">
           {/* Channels Icon */}
           <button
             onClick={toggleChannelsDropdown}
-            className="relative focus:outline-none"
+            className="relative focus:outline-none hover:opacity-80 transition"
           >
-            <img src={ChannelsIcon} alt="Channels" className="h-6 w-6" />
+            <img
+              src={showChannelsDropdown ? ChannelsIconFilled : ChannelsIcon}
+              alt="Channels"
+              className="h-6 w-6"
+            />
           </button>
 
           {/* Notifications Icon */}
           <button
             onClick={toggleNotificationsDropdown}
-            className="relative focus:outline-none"
+            className="relative focus:outline-none hover:opacity-80 transition"
           >
             <img
-              src={unreadCount > 0 ? NotificationsFilled : NotificationsIcon}
+              src={showNotificationsDropdown ? NotificationsFilled : NotificationsIcon}
               alt="Notifications"
               className="h-6 w-6"
             />
             {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+              <span className="absolute top-0 right-0 bg-[var(--delete-btn)] text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-light">
                 {unreadCount}
               </span>
             )}
@@ -127,9 +136,13 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
           {/* Comments Icon */}
           <button
             onClick={toggleCommentsDropdown}
-            className="relative focus:outline-none"
+            className="relative focus:outline-none hover:opacity-80 transition"
           >
-            <img src={CommentsIcon} alt="Comments" className="h-6 w-6" />
+            <img
+              src={showCommentsDropdown ? CommentsIconFilled : CommentsIcon}
+              alt="Comments"
+              className="h-6 w-6"
+            />
           </button>
         </div>
       </div>
@@ -147,7 +160,7 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
       {showNotificationsDropdown && (
         <Notifications
           onClose={() => setShowNotificationsDropdown(false)}
-          channelId={activeChannel} // Pass activeChannel as channelId
+          channelId={activeChannel}
         />
       )}
 

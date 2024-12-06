@@ -12,6 +12,8 @@ import {
   addDoc,
   Timestamp,
 } from "firebase/firestore";
+import DialogBoxReset from "../components/DialogBoxReset"; // Importér din dialogkomponent
+
 
 const drinkCategories = [
   {
@@ -27,12 +29,12 @@ const drinkCategories = [
   {
     type: "Cocktail",
     icon: "🍸",
-    subtypes: ["Mojito", "Margarita", "Martini", "Gin & Tonic", "Dark 'n Stormy", "White Russian", "Espresso Martini"] // Gin & Tonic is very popular in Denmark
+    subtypes: ["Mojito", "Margarita", "Gin & Tonic", "Dark 'n Stormy", "White Russian", "Espresso Martini"] // Gin & Tonic is very popular in Denmark
   },
   {
     type: "Shots",
     icon: "🥃",
-    subtypes: ["Tequila", "Jägermeister", "Vodka", "Fisk", "Gammel Dansk", "Snaps"] // Fisk and Gammel Dansk are iconic in Danish culture
+    subtypes: ["Tequila", "Jägermeister", "Fisk", "Gammel Dansk", "Snaps"] // Fisk and Gammel Dansk are iconic in Danish culture
   },
   {
     type: "Cider",
@@ -42,7 +44,7 @@ const drinkCategories = [
   {
     type: "Spirits",
     icon: "🥂",
-    subtypes: ["Rum", "Whiskey", "Aquavit", "Cognac"] // Aquavit is quintessentially Danish 
+    subtypes: ["Rum", "Whiskey", "Vodka", "Cognac"] // Aquavit is quintessentially Danish 
   },
   {
     type: "Others",
@@ -60,6 +62,7 @@ const Home = () => {
   const [totalDrinks, setTotalDrinks] = useState(0);
   const [activeCategory, setActiveCategory] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const user = auth.currentUser;
 
@@ -135,24 +138,24 @@ const Home = () => {
         setIsErrorMessage(true);
         return;
       }
-  
+
       // Fetch user data
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
-  
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
-  
+
         // Update Firestore with check-in status and location
         await updateDoc(userDocRef, {
           isCheckedIn: true,
           lastLocation: userLocation,
         });
-  
+
         setIsCheckedIn(true);
         setCheckInMessage("You are now checked in!");
         setIsErrorMessage(false);
-  
+
         // Create a notification for the check-in
         await addDoc(collection(db, "notifications"), {
           channelId: userChannel.id,
@@ -172,7 +175,7 @@ const Home = () => {
       setIsErrorMessage(true);
     }
   };
-  
+
 
   const handleAddDrink = async (category, subtype) => {
     const key = `${category}_${subtype}`;
@@ -264,121 +267,101 @@ const Home = () => {
 
 
   return (
-    <div className="text-center p-5 bg-[var(--bg-color)] text-[var(--text-color)]">
-      <h1 className="text-2xl font-semibold mb-4">
-        Welcome to SladeshPro!
-      </h1>
-  
-      <button
-        onClick={handleCheckIn}
-        className={`w-full py-3 rounded-lg text-[var(--secondary)] font-semibold transition-all ${
-          isCheckedIn
-            ? "bg-[var(--disabled)] cursor-not-allowed text-[var(--text-muted)]"
-            : "bg-[var(--primary)] hover:bg-[var(--highlight)]"
-        }`}
-        disabled={isCheckedIn}
-      >
-        {isCheckedIn ? "You are checked in" : "Check In"}
-      </button>
-  
-      {checkInMessage && (
-        <p
-          className={`mt-3 text-sm ${
-            isErrorMessage
-              ? "text-[var(--delete-btn)] font-bold"
-              : "text-[var(--text-muted)]"
-          }`}
-        >
-          {checkInMessage}
-        </p>
-      )}
-  
-      <div className="mt-8">
-        {/* Dropdown for Drink Categories */}
-        <label
-          htmlFor="drink-category"
-          className="text-lg font-semibold"
-        >
-          Choose a drink type:
-        </label>
-        <select
-          id="drink-category"
-          className="block w-full mt-2 p-3 border border-[var(--input-border)] rounded-lg bg-[var(--bg-color)] text-[var(--text-muted)]"
-          value={activeCategory || ""}
-          onChange={(e) => setActiveCategory(e.target.value || null)}
-        >
-          <option value="">Select a category</option>
-          {drinkCategories.map((category) => (
-            <option key={category.type} value={category.type}>
-              {category.icon} {category.type}
-            </option>
-          ))}
-        </select>
-  
-        {/* Subtypes for Selected Category */}
-        {activeCategory && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold">
-              {
-                drinkCategories.find((cat) => cat.type === activeCategory)
-                  .type
-              }{" "}
-              Subtypes
-            </h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              {drinkCategories
-                .find((cat) => cat.type === activeCategory)
-                .subtypes.map((subtype) => (
-                  <div
-                    key={subtype}
-                    className="flex items-center justify-between p-3 bg-[var(--divider-color)] rounded-lg shadow-md"
-                  >
-                    <span className="text-sm font-semibold">
-                      {subtype}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      {/* Subtract Drink Button */}
-                      <button
-                        onClick={() =>
-                          handleSubtractDrink(activeCategory, subtype)
-                        }
-                        className="px-2 py-1 bg-[var(--delete-btn)] text-white rounded hover:bg-[var(--delete-btn)]/90"
-                        disabled={!drinks[`${activeCategory}_${subtype}`]}
-                      >
-                        -
-                      </button>
-                      {/* Display Drink Count */}
-                      <span className="text-lg font-semibold text-[var(--primary)]">
-                        {drinks[`${activeCategory}_${subtype}`] || 0}
-                      </span>
-                      {/* Add Drink Button */}
-                      <button
-                        onClick={() =>
-                          handleAddDrink(activeCategory, subtype)
-                        }
-                        className="px-2 py-1 bg-[var(--secondary)] text-white rounded hover:bg-[var(--secondary)]/90"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-  
-        <div className="mt-5 text-lg font-semibold">
-          Total Drinks: {totalDrinks}
+    <div className="p-2 bg-[var(--bg-color)] text-[var(--text-color)] flex flex-col items-center h-auto">
+      {/* Total Drinks Counter */}
+      <div className="flex justify-between items-center w-full bg-[var(--bg-neutral)] rounded-lg shadow-md p-4 mb-6">
+        <div className="flex flex-col items-start">
+          <p className="text-lg font-medium">Total drinks</p>
+          <span className="text-4xl font-bold text-[var(--secondary)]">
+            {totalDrinks}
+          </span>
         </div>
         <button
-          onClick={handleResetDrinks}
-          className="mt-4 py-2 px-4 bg-[var(--delete-btn)] text-white rounded-lg hover:bg-[var(--delete-btn)]/90"
+          onClick={handleCheckIn}
+          className={`py-2 px-4 rounded-lg text-[var(--text-color)] font-medium ${
+            isCheckedIn
+              ? "bg-[var(--disabled)] cursor-not-allowed text-[var(--text-muted)]"
+              : "bg-[var(--primary)] hover:bg-[var(--highlight)]"
+          }`}
+          disabled={isCheckedIn}
         >
-          Reset Drinks
+          {isCheckedIn ? "Checked In" : "Check In"}
         </button>
       </div>
+  
+      {/* Drink Category Icons */}
+      <div className="grid grid-cols-4 gap-4 mb-8 w-full">
+        {drinkCategories.map((category) => (
+          <button
+            key={category.type}
+            onClick={() => setActiveCategory(category.type)}
+            className={`flex items-center justify-center w-16 h-16 rounded-full shadow-md ${
+              activeCategory === category.type
+                ? "bg-[var(--highlight)] text-white"
+                : "bg-[var(--primary)] text-white"
+            }`}
+          >
+            <span className="text-2xl">{category.icon}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => setIsDialogOpen(true)} // Åbn dialogboks
+          className="flex items-center justify-center w-16 h-16 bg-[var(--delete-btn)] font-medium text-[var(--bg-neutral)] rounded-full shadow-md hover:bg-[var(--delete-btn)]/90"
+        >
+          Reset
+        </button>
+      </div>
+
+      {isDialogOpen && (
+        <DialogBoxReset
+          onClose={() => setIsDialogOpen(false)} // Luk dialogen
+          onConfirm={() => {
+            handleResetDrinks(); // Reset drinks
+            setIsDialogOpen(false); // Luk dialogen efter handling
+          }}
+        />
+      )}
+  
+      {/* Subtypes for Selected Category */}
+      {activeCategory && (
+        <div className="grid grid-cols-2 gap-4 w-full mb-4">
+          {drinkCategories
+            .find((cat) => cat.type === activeCategory)
+            .subtypes.map((subtype) => (
+              <div
+                key={subtype}
+                className="flex flex-col items-center bg-[var(--bg-neutral)] rounded-lg shadow-md p-4"
+              >
+                {/* Title */}
+                <span className="text-sm font-bold mb-2">{subtype}</span>
+                {/* Buttons and Count */}
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleSubtractDrink(activeCategory, subtype)}
+                    className="w-8 h-8 bg-[var(--delete-btn)] text-white rounded-full flex items-center justify-center hover:bg-[var(--delete-btn)]/90"
+                    disabled={!drinks[`${activeCategory}_${subtype}`]}
+                  >
+                    -
+                  </button>
+  
+                  <span className="text-lg font-bold">
+                    {drinks[`${activeCategory}_${subtype}`] || 0}
+                  </span>
+  
+                  <button
+                    onClick={() => handleAddDrink(activeCategory, subtype)}
+                    className="w-8 h-8 bg-[var(--secondary)] text-white rounded-full flex items-center justify-center hover:bg-[var(--secondary)]/90"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
+  
 };
 
 export default Home;

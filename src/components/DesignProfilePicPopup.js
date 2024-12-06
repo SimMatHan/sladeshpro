@@ -38,24 +38,37 @@ const DesignProfilePicPopup = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 p-6">
-        <button className="text-gray-500 float-right" onClick={onClose}>✕</button>
-        <h2 className="text-xl font-semibold mb-4">Design Your Avatar</h2>
-        
+      <div className="bg-[var(--bg-color)] rounded-lg shadow-heavy w-11/12 md:w-3/4 p-6">
+        <button
+          className="text-[var(--text-muted)] float-right hover:text-[var(--error-color)] transition"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <h2 className="text-xl font-semibold text-[var(--text-color)] mb-4">
+          Design Your Avatar
+        </h2>
+  
         <div
-          className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
+          className="profile-image w-24 h-24 rounded-full flex items-center justify-center mb-4 shadow-light"
           style={{ background: selectedColor }}
         >
-          <span className="text-4xl">{selectedAvatar}</span>
+          <span className="text-4xl font-bold">{selectedAvatar}</span>
         </div>
-
+  
         <div className="mb-4">
-          <h3 className="text-gray-600 mb-2">Select an Avatar</h3>
+          <h3 className="subheading text-[var(--text-muted)] mb-2">
+            Select an Avatar
+          </h3>
           <div className="grid grid-cols-5 gap-2">
             {emojiOptions.map((emoji, index) => (
               <button
                 key={index}
-                className={`p-2 rounded ${emoji === selectedAvatar ? 'bg-blue-200' : 'bg-gray-100'}`}
+                className={`p-2 rounded transition ${
+                  emoji === selectedAvatar
+                    ? "bg-[var(--primary)] text-[var(--secondary)]"
+                    : "bg-[var(--bg-neutral)] text-[var(--text-muted)]"
+                }`}
                 onClick={() => setSelectedAvatar(emoji)}
               >
                 {emoji}
@@ -63,31 +76,33 @@ const DesignProfilePicPopup = ({ onClose }) => {
             ))}
           </div>
         </div>
-
+  
         <div className="mb-6">
-          <h3 className="text-gray-600 mb-2">Select Background Color</h3>
+          <h3 className="subheading text-[var(--text-muted)] mb-2">
+            Select Background Color
+          </h3>
           <div className="grid grid-cols-5 gap-2">
             {colorOptions.map((color, index) => (
               <button
                 key={index}
-                className="w-10 h-10 rounded-full border"
+                className="w-10 h-10 rounded-full border shadow-light hover:shadow-heavy transition"
                 style={{ background: color.gradient }}
                 onClick={() => setSelectedColor(color.gradient)}
               />
             ))}
           </div>
         </div>
-
+  
         <div className="flex gap-4">
           <button
             onClick={handleSave}
-            className="bg-green-600 text-white py-2 px-4 rounded shadow-md hover:bg-green-700 flex-1"
+            className="button-primary flex-1 py-3"
           >
             Save Avatar
           </button>
           <button
             onClick={onClose}
-            className="bg-gray-300 text-gray-700 py-2 px-4 rounded shadow-md hover:bg-gray-400 flex-1"
+            className="bg-[var(--bg-neutral)] text-[var(--text-muted)] py-3 px-4 rounded shadow-md hover:bg-[var(--divider-color)] flex-1 transition"
           >
             Cancel
           </button>

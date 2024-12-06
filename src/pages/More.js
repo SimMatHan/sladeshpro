@@ -13,20 +13,34 @@ const More = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">More</h1>
+    <div className="p-4 bg-[var(--bg-color)] min-h-screen">
+      <h1 className="text-xl font-bold mb-6 text-[var(--text-color)]">
+        More
+      </h1>
       <div className="space-y-6">
         <button
           onClick={handleNavigateToChannelSettings}
-          className="w-full py-4 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-semibold"
+          className="w-full py-4 bg-[var(--primary)] text-[var(--secondary)] rounded-lg font-semibold hover:bg-[var(--highlight)] transition"
         >
           Manage Channels
         </button>
         <button
           onClick={handleNavigateToUserSettings}
-          className="w-full py-4 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-semibold"
+          className="w-full py-4 bg-[var(--primary)] text-[var(--secondary)] rounded-lg font-semibold hover:bg-[var(--highlight)] transition"
         >
           User Settings
+        </button>
+        <button
+          disabled
+          className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
+        >
+          Charts (Coming Soon)
+        </button>
+        <button
+          disabled
+          className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
+        >
+          DarkMode (Coming Soon)
         </button>
       </div>
     </div>

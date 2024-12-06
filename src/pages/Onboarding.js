@@ -25,29 +25,36 @@ const slides = [
     title: "Add to Home Screen",
     content: (selectedBrowser, setSelectedBrowser) => (
       <>
-        <p className="text-gray-600 mb-4">
+        <p className="text-[var(--text-muted)] mb-4">
           Add this website to your home screen for a more native app experience.
         </p>
+        {/* Tabs Container */}
         <div className="flex justify-center space-x-4 mb-4">
           <button
-            className={`font-bold ${selectedBrowser === 'Safari' ? 'text-blue-600' : 'text-gray-600'}`}
-            onClick={() => setSelectedBrowser('Safari')}
+            className={`py-2 px-4 rounded-full ${selectedBrowser === "Safari"
+                ? "bg-[var(--primary)] text-[var(--secondary)] font-semibold"
+                : "bg-[var(--bg-neutral)] text-[var(--text-muted)]"
+              }`}
+            onClick={() => setSelectedBrowser("Safari")}
           >
             Safari
           </button>
           <button
-            className={`font-bold ${selectedBrowser === 'Chrome' ? 'text-blue-600' : 'text-gray-600'}`}
-            onClick={() => setSelectedBrowser('Chrome')}
+            className={`py-2 px-4 rounded-full ${selectedBrowser === "Chrome"
+                ? "bg-[var(--primary)] text-[var(--secondary)] font-semibold"
+                : "bg-[var(--bg-neutral)] text-[var(--text-muted)]"
+              }`}
+            onClick={() => setSelectedBrowser("Chrome")}
           >
             Chrome
           </button>
         </div>
-        {selectedBrowser === 'Safari' ? (
+        {selectedBrowser === "Safari" ? (
           <div>
-            <h3 className="font-semibold mb-2">
+            <h3 className="font-semibold text-[var(--text-color)] mb-2">
               How to Add Website to Home Screen in Safari
             </h3>
-            <ol className="list-decimal pl-5 text-left">
+            <ol className="list-decimal pl-5 text-left text-[var(--text-color)]">
               <li>Open Safari on your iPhone.</li>
               <li>Visit the website.</li>
               <li>Tap the <strong>Share</strong> button.</li>
@@ -57,10 +64,10 @@ const slides = [
           </div>
         ) : (
           <div>
-            <h3 className="font-semibold mb-2">
+            <h3 className="font-semibold text-[var(--text-color)] mb-2">
               How to Add Website to Home Screen in Chrome
             </h3>
-            <ol className="list-decimal pl-5 text-left">
+            <ol className="list-decimal pl-5 text-left text-[var(--text-color)]">
               <li>Open Chrome on your phone.</li>
               <li>Visit the website.</li>
               <li>Tap the three dots in the top-right corner.</li>
@@ -72,6 +79,7 @@ const slides = [
     ),
   },
 ];
+
 
 const Onboarding = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -97,14 +105,16 @@ const Onboarding = () => {
       : slides[currentSlide].content;
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen p-6 text-center bg-white">
-      <h1 className="text-3xl font-bold text-blue-600 mb-4">
+    <div className="flex flex-col items-center justify-center h-[calc(-150px+100vh)] p-6 text-center bg-[var(--bg-color)]">
+      <h1 className="text-3xl font-bold text-[var(--primary)] mb-4">
         {slides[currentSlide].title}
       </h1>
-      <div className="text-lg text-gray-600 mb-8">{currentContent}</div>
+      <div className="text-lg text-[var(--text-muted)] mb-8">
+        {currentContent}
+      </div>
       <button
         onClick={handleNext}
-        className="px-6 py-3 bg-blue-600 text-white text-lg rounded-full shadow-md hover:bg-blue-700 transition duration-300"
+        className="px-6 py-3 bg-[var(--primary)] text-[var(--secondary)] text-lg rounded-full shadow-light hover:bg-[var(--highlight)] transition duration-300"
       >
         {currentSlide < slides.length - 1 ? "Next" : "Let's Go"}
       </button>

@@ -68,28 +68,32 @@ const SendSladeshDialog = ({ onClose, onSladeshSent, message }) => {
   }, [tiltDetected, onSladeshSent, onClose]);
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
-        <h2 className="text-xl font-semibold mb-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-[var(--bg-color)] p-6 rounded-lg shadow-heavy max-w-sm text-center">
+        <h2 className="text-xl font-semibold text-[var(--text-color)] mb-4">
           {message ? "Sladesh Limit Reached" : "Send a Sladesh"}
         </h2>
         {message ? (
-          <p className="text-gray-700 mb-4">{message}</p>
+          <p className="text-[var(--text-muted)] mb-4">{message}</p>
         ) : !tiltDetected ? (
-          <p className="text-gray-700 mb-4">
+          <p className="text-[var(--text-muted)] mb-4">
             {permissionGranted
               ? "Tilt your phone to confirm sending the Sladesh."
               : "Please grant gyroscope access to send a Sladesh."}
           </p>
         ) : (
           <>
-            <p className="text-green-500 font-semibold mb-4">Sladesh Sent!</p>
+            <p className="text-[var(--primary)] font-semibold mb-4">Sladesh Sent!</p>
             <Confetti width={window.innerWidth} height={window.innerHeight} />
           </>
         )}
         <button
           onClick={onClose}
-          className="py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          className={`py-2 px-4 rounded-lg shadow-md transition ${
+            message
+              ? "bg-[var(--primary)] text-white hover:bg-[var(--highlight)]"
+              : "bg-[var(--delete-btn)] text-white hover:bg-[var(--delete-btn)]/90"
+          }`}
           disabled={tiltDetected && !message}
         >
           {message ? "Close" : "Cancel"}

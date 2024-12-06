@@ -46,21 +46,25 @@ const UserSettings = () => {
   }
 
   return (
-    <div className="p-2">
-      <h2 className="text-lg font-semibold text-gray-800 text-center mb-6">User Settings</h2>
+    <div className="p-4 bg-[var(--bg-color)] text-[var(--text-color)]">
+      <h2 className="text-xl font-semibold text-center mb-6">
+        User Settings
+      </h2>
       <div className="space-y-4 text-center">
         <div
-          className="w-40 h-40 rounded-full mx-auto flex items-center justify-center mb-4"
+          className="profile-image w-40 h-40 rounded-full mx-auto flex items-center justify-center shadow-lg"
           style={{
             background: profileBackgroundColor || "linear-gradient(135deg, #f0f0f0, #f0f0f0)",
           }}
         >
-          <span className="text-6xl">{profileImageUrl || "👤"}</span>
+          <span className="text-6xl font-bold">
+            {profileImageUrl || "👤"}
+          </span>
         </div>
         <button
           type="button"
           onClick={handleOpenDesignPopup}
-          className="w-full py-4 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-semibold"
+          className="button-primary w-full py-4 text-[var(--text-color)] text-lg font-semibold"
         >
           Design Profile Pic
         </button>
@@ -70,5 +74,6 @@ const UserSettings = () => {
     </div>
   );
 };
+
 
 export default UserSettings;

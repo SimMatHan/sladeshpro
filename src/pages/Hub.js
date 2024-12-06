@@ -183,21 +183,21 @@ const Hub = ({ activeChannel }) => {
       const currentUser = auth.currentUser;
       if (!currentUser || !activeChannel)
         throw new Error("User not authenticated or no active channel");
-  
+
       const senderUID = currentUser.uid;
       const senderDocRef = doc(db, "users", senderUID);
       const senderDoc = await getDoc(senderDocRef);
-  
+
       if (!senderDoc.exists()) {
         throw new Error("Sender data not found in Firestore");
       }
-  
+
       const senderData = senderDoc.data();
       const senderName = senderData.username || "Anonymous";
-  
+
       const currentTime = new Date();
       const sladeshId = `${Date.now()}-${member.uid}`;
-  
+
       const receiverSladeshRef = doc(
         db,
         `users/${member.uid}/sladesh/${sladeshId}`
@@ -211,7 +211,7 @@ const Hub = ({ activeChannel }) => {
         sentAt: currentTime.toISOString(),
         completed: false,
       });
-  
+
       const senderSladeshRef = doc(
         db,
         `users/${senderUID}/sladeshSent/${sladeshId}`
@@ -224,7 +224,7 @@ const Hub = ({ activeChannel }) => {
         message: message,
         sentAt: currentTime.toISOString(),
       });
-  
+
       const notificationRef = doc(collection(db, "notifications"));
       await setDoc(notificationRef, {
         channelId: activeChannel,
@@ -233,16 +233,16 @@ const Hub = ({ activeChannel }) => {
         timestamp: currentTime,
         watched: false,
       });
-  
+
       await updateDoc(senderDocRef, {
         lastSladeshTimestamp: currentTime.toISOString(),
       });
-  
+
       setSladeshConfirmation(`Sladesh successfully sent to ${member.userName}! 🎉`);
       setTimeout(() => {
         setSladeshConfirmation(""); // Clear confirmation message after 5 seconds
       }, 3000);
-  
+
       setMessage("");
       setExpandedMemberId(null);
     } catch (error) {
@@ -253,7 +253,7 @@ const Hub = ({ activeChannel }) => {
       }, 3000);
     }
   };
-  
+
   const handleCompleteSladesh = (sladeshId, fromUID) => {
     setCurrentSladesh({ sladeshId, fromUID });
     setShowConfirmation(true);
@@ -401,55 +401,77 @@ const Hub = ({ activeChannel }) => {
         />
       )}
       {/* Tab Navigation */}
-      <div className="flex justify-around border-b mb-6">
+      {/* Tab Navigation */}
+      <div className="flex justify-between items-center rounded-full mb-4">
         <button
           onClick={() => setActiveTab("Active")}
-          className={`flex-1 py-2 text-center ${activeTab === "Active"
-            ? "border-b-4 border-blue-600 text-blue-600 font-semibold"
-            : "text-gray-600"
+          className={`flex-1 py-2 mx-1 text-center rounded-full ${activeTab === "Active"
+            ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
+            : "bg-[var(--primary)] text-[var(--secondary)]"
             }`}
         >
           Active
         </button>
         <button
           onClick={() => setActiveTab("Sent")}
-          className={`flex-1 py-2 text-center ${activeTab === "Sent"
-            ? "border-b-4 border-blue-600 text-blue-600 font-semibold"
-            : "text-gray-600"
+          className={`flex-1 py-2 mx-1 text-center rounded-full ${activeTab === "Sent"
+            ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
+            : "bg-[var(--primary)] text-[var(--secondary)]"
             }`}
         >
           Sent
         </button>
         <button
           onClick={() => setActiveTab("Inbox")}
-          className={`flex-1 py-2 text-center relative ${activeTab === "Inbox"
-            ? "border-b-4 border-blue-600 text-blue-600 font-semibold"
-            : "text-gray-600"
+          className={`flex-1 py-2 mx-1 text-center rounded-full ${activeTab === "Inbox"
+            ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
+            : "bg-[var(--primary)] text-[var(--secondary)]"
             }`}
         >
           Inbox
           {hasNewSladesh && (
-            <span className="absolute top-0 right-3 bg-red-500 text-white text-xs rounded-full px-2">
+            <span className="absolute top-1 right-3 bg-[var(--delete-btn)] text-white text-xs rounded-full px-2">
               New
             </span>
           )}
         </button>
       </div>
 
+
+
       {/* Tab Content */}
       <div>
         {activeTab === "Active" && (
           <div>
-            <h2 className="text-lg font-semibold mb-3 text-gray-700">
-              Checked-in Members
+            <h2 className="text-lg font-semibold mb-3 text-[var(--text-color)]">
+              Active Members
             </h2>
             <ul className="space-y-4">
               {checkedInMembers.map((member) => (
                 <li
                   key={member.uid}
-                  className="bg-gray-100 p-4 rounded-lg shadow-md flex items-center justify-between"
+                  className="bg-[var(--bg-neutral)] p-4 rounded-lg shadow flex items-center justify-between"
                 >
-                  <span className="text-gray-800 font-semibold">{member.userName}</span>
+                  {/* Profilbillede */}
+                  <div className="flex items-center space-x-4">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-semibold text-white"
+                      style={{
+                        background: member.profileBackgroundColor || "#CCCCCC",
+                      }}
+                    >
+                      {member.profileImageUrl ? (
+                        <span>{member.profileImageUrl}</span>
+                      ) : (
+                        <span>{member.userName.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    {/* Brugerens Navn */}
+                    <span className="text-[var(--text-color)] font-medium">
+                      {member.userName}
+                    </span>
+                  </div>
+                  {/* Send Sladesh Knap */}
                   <button
                     onClick={() => {
                       if (member.canSendSladesh) {
@@ -457,10 +479,10 @@ const Hub = ({ activeChannel }) => {
                         setShowSendSladeshDialog(true);
                       }
                     }}
-                    disabled={!member.canSendSladesh} // Disable if Sladesh already used
-                    className={`py-2 px-4 rounded-lg ${member.canSendSladesh
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                    disabled={!member.canSendSladesh}
+                    className={`py-2 px-4 rounded-lg text-sm font-medium ${member.canSendSladesh
+                      ? "bg-[var(--primary)] text-white hover:bg-[var(--highlight)]"
+                      : "bg-gray-400 text-gray-700 cursor-not-allowed"
                       }`}
                   >
                     {member.canSendSladesh ? "Send Sladesh" : "Sladesh Used"}
@@ -468,30 +490,40 @@ const Hub = ({ activeChannel }) => {
                 </li>
               ))}
             </ul>
-
-
           </div>
         )}
 
         {activeTab === "Sent" && (
           <div>
-            <h2 className="text-lg font-semibold mb-3 text-gray-700">
+            <h2 className="text-lg font-semibold mb-4 text-[var(--text-color)]">
               Sent Sladeshes
             </h2>
             <ul className="space-y-4">
               {sentSladesh.map((sladesh) => (
                 <li
                   key={sladesh.id}
-                  className="bg-gray-100 p-4 rounded-lg shadow-md"
+                  className={`p-4 rounded-lg shadow-md flex justify-between items-center ${sladesh.completed
+                    ? "bg-[var(--primary)]"
+                    : "bg-[var(--bg-neutral)]"
+                    }`}
                 >
-                  <p className="text-gray-800 font-semibold">
-                    To: {sladesh.toName}
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    Sent at: {new Date(sladesh.sentAt).toLocaleString()}
-                  </p>
+                  <div>
+                    <p className="text-[var(--text-color)] font-semibold">
+                      Sladesh sent to:{" "}
+                      <span className="text-[var(--secondary)]">{sladesh.toName}</span>
+                    </p>
+                    <p className="text-[var(--text-muted)] text-sm">
+                      {new Date(sladesh.sentAt).toLocaleDateString()}{" "}
+                      {new Date(sladesh.sentAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
                   <p
-                    className={`mt-2 font-semibold ${sladesh.completed ? "text-green-500" : "text-gray-500"
+                    className={`text-sm font-semibold ${sladesh.completed
+                      ? "text-[var(--secondary)]"
+                      : "text-[var(--text-muted)]"
                       }`}
                   >
                     {sladesh.completed ? "Completed" : "Not Completed"}
@@ -500,42 +532,60 @@ const Hub = ({ activeChannel }) => {
               ))}
             </ul>
           </div>
+
         )}
 
         {activeTab === "Inbox" && (
           <div>
-            <h2 className="text-lg font-semibold mb-3 text-gray-700">
+            <h2 className="text-lg font-semibold mb-4 text-[var(--text-color)]">
               Received Sladeshes
             </h2>
             <ul className="space-y-4">
               {receivedSladesh.map((sladesh) => (
                 <li
                   key={sladesh.id}
-                  className="bg-gray-100 p-4 rounded-lg shadow-md"
+                  className={`p-4 rounded-lg shadow-md flex justify-between items-center ${sladesh.completed
+                      ? "bg-[var(--primary)]"
+                      : "bg-[var(--bg-neutral)]"
+                    }`}
                 >
-                  <p className="text-gray-800 font-semibold">
-                    From: {sladesh.fromName}
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    Received at: {new Date(sladesh.sentAt).toLocaleString()}
-                  </p>
-                  {!sladesh.completed && (
+                  <div>
+                    <p
+                      className={`font-semibold ${sladesh.completed
+                          ? "text-[var(--secondary)]"
+                          : "text-[var(--text-color)]"
+                        }`}
+                    >
+                      Sladesh sent from:{" "}
+                      <span className="text-[var(--secondary)]">{sladesh.fromName}</span>
+                    </p>
+                    <p className="text-[var(--text-muted)] text-sm">
+                      {new Date(sladesh.sentAt).toLocaleDateString()}{" "}
+                      {new Date(sladesh.sentAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  {!sladesh.completed ? (
                     <button
                       onClick={() =>
                         handleCompleteSladesh(sladesh.id, sladesh.fromUID)
                       }
-                      className="mt-2 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      className="py-2 px-4 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--highlight)] transition"
                     >
                       Complete
                     </button>
-                  )}
-                  {sladesh.completed && (
-                    <span className="text-green-500">Completed</span>
+                  ) : (
+                    <span className="font-semibold text-[var(--secondary)]">
+                      Completed
+                    </span>
                   )}
                 </li>
               ))}
             </ul>
           </div>
+
         )}
       </div>
     </div>

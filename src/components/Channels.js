@@ -76,15 +76,21 @@ const Channels = ({ activeChannel, setActiveChannel, onClose }) => {
   };
 
   return (
-    <div className="fixed top-[60px] inset-0 flex justify-center items-start z-50">
+    <div className="fixed top-[50px] inset-0 flex justify-center items-start z-50">
+      {/* Overlay */}
       <div
         className="fixed top-[60px] inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       ></div>
-      <div className="bg-white rounded-b-lg shadow-lg w-full md:w-3/4 lg:w-1/2 max-h-[80vh] p-4 mt-0 overflow-hidden transform translate-y-0">
-        <h2 className="text-lg font-semibold mb-4">Your Channels</h2>
+  
+      {/* Channels Container */}
+      <div className="bg-[var(--bg-color)] rounded-b-lg shadow-heavy w-full md:w-3/4 lg:w-1/2 max-h-[80vh] p-4 mt-0 overflow-hidden transform translate-y-0">
+        <h2 className="text-lg font-semibold text-[var(--text-color)] mb-4">
+          Your Channels
+        </h2>
+  
         {loading ? (
-          <p className="text-gray-500">Loading channels...</p>
+          <p className="text-[var(--text-muted)]">Loading channels...</p>
         ) : (
           <div className="overflow-y-auto max-h-[60vh] space-y-4">
             {channels.length > 0 ? (
@@ -92,17 +98,17 @@ const Channels = ({ activeChannel, setActiveChannel, onClose }) => {
                 <button
                   key={channel.id}
                   onClick={() => handleSelectChannel(channel.id)}
-                  className={`block w-full text-left px-4 py-2 rounded-lg shadow-md ${
+                  className={`block w-full text-left px-4 py-2 rounded-lg shadow-md transition ${
                     activeChannel === channel.id
-                      ? "bg-gray-200 font-semibold"
-                      : "bg-gray-100"
-                  } hover:bg-gray-300`}
+                      ? "bg-[var(--primary)] text-[var(--secondary)] font-semibold"
+                      : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
+                  } hover:bg-[var(--highlight)] hover:text-[var(--secondary)]`}
                 >
                   {channel.name}
                 </button>
               ))
             ) : (
-              <p className="text-gray-500">No channels available</p>
+              <p className="text-[var(--text-muted)]">No channels available</p>
             )}
           </div>
         )}

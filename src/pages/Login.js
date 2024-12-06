@@ -109,17 +109,19 @@ const Login = () => {
   };
 
   return (
-    <div className="max-w-sm mx-auto p-6 shadow-lg rounded-lg bg-white text-center">
-      <h1 className="text-3xl font-bold text-blue-600 mb-2">Welcome to SladeshPro!</h1>
-      <div className="text-gray-500 mb-6">
+    <div className="max-w-sm mx-auto p-6 shadow-light rounded-lg bg-[var(--bg-color)] text-center">
+      <h1 className="text-3xl font-bold text-[var(--primary)] mb-2">Welcome to SladeshPro!</h1>
+      <div className="text-[var(--text-muted)] mb-6">
         Track your hydration, reach your goals, and stay consistent with SladeshPro.
       </div>
       
-      <h2 className="text-2xl font-semibold mb-4">{isRegistering ? "Register" : "Login"}</h2>
-
-      {message && <p className="text-green-600 mb-4">{message}</p>}
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
+      <h2 className="text-2xl font-semibold mb-4 text-[var(--text-color)]">
+        {isRegistering ? "Register" : "Login"}
+      </h2>
+  
+      {message && <p className="text-[var(--highlight)] mb-4">{message}</p>}
+      {error && <p className="text-[var(--error-color)] mb-4">{error}</p>}
+  
       <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-4">
         {isRegistering && (
           <input
@@ -128,7 +130,7 @@ const Login = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full p-3 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring focus:ring-blue-200"
+            className="w-full p-3 border border-[var(--input-border)] rounded-md text-lg text-[var(--text-color)] focus:outline-none focus:ring focus:ring-[var(--primary)]"
           />
         )}
         <input
@@ -137,7 +139,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring focus:ring-blue-200"
+          className="w-full p-3 border border-[var(--input-border)] rounded-md text-lg text-[var(--text-color)] focus:outline-none focus:ring focus:ring-[var(--primary)]"
         />
         <input
           type="password"
@@ -145,23 +147,23 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring focus:ring-blue-200"
+          className="w-full p-3 border border-[var(--input-border)] rounded-md text-lg text-[var(--text-color)] focus:outline-none focus:ring focus:ring-[var(--primary)]"
         />
         <button
           type="submit"
-          className="w-full py-3 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 transition duration-300"
+          className="w-full py-3 bg-[var(--primary)] text-[var(--secondary)] text-lg rounded-md hover:bg-[var(--highlight)] transition duration-300"
         >
           {isRegistering ? "Register" : "Login"}
         </button>
       </form>
-
-      <p className="mt-4 text-gray-600">
+  
+      <p className="mt-4 text-[var(--text-muted)]">
         {isRegistering ? "Already have an account?" : "Don't have an account?"}
       </p>
       <p>
         <button
           onClick={() => setIsRegistering(!isRegistering)}
-          className="text-blue-500 font-semibold hover:text-blue-600 transition duration-200"
+          className="text-[var(--primary)] font-semibold transition duration-200"
         >
           {isRegistering ? "Login" : "Register"}
         </button>

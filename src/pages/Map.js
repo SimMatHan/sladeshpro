@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -17,6 +17,22 @@ const DefaultIcon = L.icon({
   popupAnchor: [1, -34],
 });
 
+const BlueMarker = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+const GreenMarker = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
 // Custom red marker for the current user
 const RedIcon = L.icon({
   iconUrl: markerIcon,
@@ -25,7 +41,7 @@ const RedIcon = L.icon({
   popupAnchor: [1, -34],
 });
 
-L.Marker.prototype.options.icon = DefaultIcon;
+L.Marker.prototype.options.icon = GreenMarker;
 
 // Helper function to calculate distance between two points (Haversine formula)
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -35,9 +51,9 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in meters
 };
@@ -147,8 +163,8 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
           className="h-full w-full"
         >
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://carto.com/attributions">CartoDB</a> contributors'
           />
 
           {/* Grouped markers */}
@@ -158,7 +174,7 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
               <Marker
                 key={index}
                 position={[firstLocation.latitude, firstLocation.longitude]}
-                icon={group.length > 1 ? RedIcon : DefaultIcon} // Use RedIcon if multiple markers are grouped
+                icon={group.length > 1 ? BlueMarker : GreenMarker} // Use RedIcon if multiple markers are grouped
               >
                 <Popup>
                   {group.length > 1 ? (
@@ -184,7 +200,7 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
           {currentPosition && (
             <Marker
               position={[currentPosition.latitude, currentPosition.longitude]}
-              icon={RedIcon}
+              icon={BlueMarker}
             >
               <Popup>
                 <p>
