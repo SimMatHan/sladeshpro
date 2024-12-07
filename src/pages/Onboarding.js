@@ -1,8 +1,8 @@
 // src/pages/Onboarding.js
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../firebaseConfig';
-import { doc, updateDoc } from 'firebase/firestore';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth, db } from "../firebaseConfig";
+import { doc, updateDoc } from "firebase/firestore";
 
 const slides = [
   {
@@ -31,19 +31,21 @@ const slides = [
         {/* Tabs Container */}
         <div className="flex justify-center space-x-4 mb-4">
           <button
-            className={`py-2 px-4 rounded-full ${selectedBrowser === "Safari"
+            className={`py-2 px-4 rounded-full ${
+              selectedBrowser === "Safari"
                 ? "bg-[var(--primary)] text-[var(--secondary)] font-semibold"
                 : "bg-[var(--bg-neutral)] text-[var(--text-muted)]"
-              }`}
+            }`}
             onClick={() => setSelectedBrowser("Safari")}
           >
             Safari
           </button>
           <button
-            className={`py-2 px-4 rounded-full ${selectedBrowser === "Chrome"
+            className={`py-2 px-4 rounded-full ${
+              selectedBrowser === "Chrome"
                 ? "bg-[var(--primary)] text-[var(--secondary)] font-semibold"
                 : "bg-[var(--bg-neutral)] text-[var(--text-muted)]"
-              }`}
+            }`}
             onClick={() => setSelectedBrowser("Chrome")}
           >
             Chrome
@@ -80,10 +82,9 @@ const slides = [
   },
 ];
 
-
-const Onboarding = () => {
+const Onboarding = ({ onComplete }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [selectedBrowser, setSelectedBrowser] = useState('Safari');
+  const [selectedBrowser, setSelectedBrowser] = useState("Safari");
   const navigate = useNavigate();
 
   const handleNext = async () => {
@@ -92,9 +93,15 @@ const Onboarding = () => {
     } else {
       const user = auth.currentUser;
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        await updateDoc(userDocRef, { hasCompletedOnboarding: true });
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          await updateDoc(userDocRef, { hasCompletedOnboarding: true });
+          console.log("Firestore updated: hasCompletedOnboarding set to true for user", user.uid);
+        } catch (error) {
+          console.error("Error updating onboarding status in Firestore:", error);
+        }
       }
+      onComplete(); // Opdater state i App.js
       navigate("/home");
     }
   };

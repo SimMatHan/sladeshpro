@@ -24,7 +24,7 @@ const BottomMenu = () => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-[var(--bg-color)] shadow-light flex justify-around py-3 z-50 bottom-menu">
+    <nav className="fixed bottom-20 inset-x-0 bg-[var(--bg-color)] shadow-light flex justify-around py-3 z-50 bottom-menu">
       {menuItems.map(({ path, icon, iconFilled, label }) => (
         <Link
           to={path}

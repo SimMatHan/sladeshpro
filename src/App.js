@@ -52,10 +52,18 @@ function App() {
   useEffect(() => {
     const fetchOnboardingStatus = async () => {
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setHasCompletedOnboarding(userDoc.data().hasCompletedOnboarding || false);
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const onboardingStatus = userDoc.data().hasCompletedOnboarding || false;
+            setHasCompletedOnboarding(onboardingStatus);
+            console.log("Fetched onboarding status:", onboardingStatus);
+          } else {
+            console.warn("User document does not exist for user:", user.uid);
+          }
+        } catch (error) {
+          console.error("Error fetching onboarding status:", error);
         }
       }
     };
@@ -70,7 +78,7 @@ function App() {
         try {
           await createDefaultChannelIfNotExists(); // Ensure default channel exists
           await addUserToDefaultChannel(user); // Add user to default channel
-  
+
           // Fetch user's channels
           const channelsRef = collection(db, "channels");
           const channelsQuery = query(
@@ -83,10 +91,10 @@ function App() {
             ...doc.data(),
           }));
           setChannelList(channels);
-  
+
           // Determine active channel
           const userDocRef = doc(db, "users", user.uid);
-  
+
           const defaultChannel = channels.find((channel) => channel.id === defaultChannelId);
           setActiveChannel(defaultChannel?.id || channels[0]?.id);
 
@@ -97,10 +105,10 @@ function App() {
         }
       }
     };
-  
+
     fetchChannels();
   }, [user]);
-  
+
   useEffect(() => {
     if (user) {
       updateUserToken(user);
@@ -127,7 +135,7 @@ function App() {
       const defaultChannelId = "DenAbneKanal"; // The ID of the default channel
       const defaultChannelRef = doc(db, "channels", defaultChannelId);
       const defaultChannelSnap = await getDoc(defaultChannelRef);
-  
+
       if (defaultChannelSnap.exists()) {
         const defaultChannelData = defaultChannelSnap.data();
         if (!defaultChannelData.members?.includes(user.uid)) {
@@ -152,7 +160,7 @@ function App() {
     try {
       const defaultChannelRef = doc(db, "channels", defaultChannelId);
       const defaultChannelSnap = await getDoc(defaultChannelRef);
-  
+
       if (!defaultChannelSnap.exists()) {
         // Create the default channel
         await setDoc(defaultChannelRef, {
@@ -167,7 +175,7 @@ function App() {
       console.error(`Error creating default channel "${defaultChannelId}":`, error);
     }
   };
-  
+
 
   if (loading) {
     return <p className="text-center text-lg font-semibold">Loading...</p>;
@@ -178,6 +186,7 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* TopMenu vises ikke under onboarding */}
       {user && location.pathname !== "/onboarding" && (
         <TopMenu
           activeChannel={activeChannel}
@@ -187,15 +196,47 @@ function App() {
       )}
       <div className="page-content">
         <Routes location={location}>
+          {/* Root path redirects to Home or Onboarding */}
           <Route
             path="/"
-            element={user ? <Navigate to="/home" /> : <Navigate to="/login" />}
+            element={
+              user ? (
+                hasCompletedOnboarding ? (
+                  <Navigate to="/home" />
+                ) : (
+                  <Navigate to="/onboarding" />
+                )
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
+
+          {/* Home page */}
           <Route
             path="/home"
-            element={user ? <Home activeChannel={activeChannel} /> : <Navigate to="/login" />}
+            element={
+              user ? (
+                <Home activeChannel={activeChannel} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
-          <Route path="/onboarding" element={<Onboarding />} />
+
+          {/* Onboarding page */}
+          <Route
+            path="/onboarding"
+            element={
+              user && !hasCompletedOnboarding ? (
+                <Onboarding onComplete={() => setHasCompletedOnboarding(true)} />
+              ) : (
+                <Navigate to="/home" />
+              )
+            }
+          />
+
+          {/* Other authenticated routes */}
           <Route
             path="/hub"
             element={user ? <Hub activeChannel={activeChannel} /> : <Navigate to="/login" />}
@@ -220,6 +261,8 @@ function App() {
             path="/more"
             element={user ? <More /> : <Navigate to="/login" />}
           />
+
+          {/* Login page */}
           <Route
             path="/login"
             element={
@@ -232,19 +275,26 @@ function App() {
           />
         </Routes>
       </div>
+
+      {/* BottomMenu vises ikke under onboarding */}
       {user && location.pathname !== "/onboarding" && <BottomMenu />}
+
+      {/* Notifications vises som en overlay */}
       {showNotifications && (
         <Notifications
           onClose={toggleNotifications}
           channelId={activeChannel}
         />
       )}
+
+      {/* Comments vises som en overlay */}
       {showComments && (
         <Comments onClose={toggleComments} channelId={activeChannel} />
       )}
     </div>
   );
-  
+
+
 }
 
 export default App;
