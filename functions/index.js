@@ -94,6 +94,7 @@ exports.resetUserData = functions.pubsub
                     drinks: {}, // Clear drink counts
                     totalDrinks: 0, // Reset total drink count
                     isCheckedIn: false, // Reset check-in status
+                    lastLocation: null, // Reset last location
                 };
 
                 batch.update(userDoc.ref, updatedData);

@@ -66,21 +66,27 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
   useEffect(() => {
     const fetchMemberLocations = async () => {
       if (!activeChannel) return;
-
+  
       try {
+        // Fetch members from the active channel
         const membersRef = collection(db, `channels/${activeChannel}/members`);
         const snapshot = await getDocs(membersRef);
-
+  
         const memberUIDs = snapshot.docs.map((doc) => doc.data().userUID);
-
-        // Fetch users' lastLocation based on their UID
+  
+        if (memberUIDs.length === 0) {
+          setMemberLocations([]); // No members found
+          return;
+        }
+  
+        // Fetch user locations for the retrieved UIDs
         const usersRef = collection(db, "users");
         const usersQuery = query(
           usersRef,
-          where("uid", "in", memberUIDs) // Get only users in the active channel
+          where("uid", "in", memberUIDs) // Filter by the member UIDs
         );
         const usersSnapshot = await getDocs(usersQuery);
-
+  
         const locations = [];
         usersSnapshot.forEach((doc) => {
           const userData = doc.data();
@@ -96,15 +102,16 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
             });
           }
         });
-
-        setMemberLocations(locations);
+  
+        setMemberLocations(locations); // Update state with fetched locations
       } catch (error) {
         console.error("Error fetching member locations:", error);
       }
     };
-
+  
     fetchMemberLocations();
   }, [activeChannel]);
+  
 
   // Get current user's position
   useEffect(() => {

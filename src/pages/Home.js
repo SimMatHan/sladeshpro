@@ -122,68 +122,80 @@ const Home = () => {
 
   const handleCheckIn = async () => {
     try {
-      // Check if user, userChannel, and userLocation are available
       if (!user) {
         setCheckInMessage("You need to be logged in to check in.");
         setIsErrorMessage(true);
         return;
       }
-      if (!userChannel) {
-        setCheckInMessage("You need to join a channel to check in.");
-        setIsErrorMessage(true);
-        return;
-      }
+  
+      // Ensure location access is optional, not blocking
       if (!userLocation) {
-        setCheckInMessage("Location access is required to check in.");
-        setIsErrorMessage(true);
-        return;
+        console.warn("Location access not available. Proceeding without location.");
       }
-
-      // Fetch user data
+  
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
+  
+      if (!userDoc.exists()) {
+        // Create user data if it doesn't exist
+        await updateDoc(userDocRef, {
+          isCheckedIn: true,
+          lastLocation: userLocation || null,
+        });
+        setCheckInMessage("Check-in successful!");
+      } else {
         const userData = userDoc.data();
-
+  
         // Update Firestore with check-in status and location
         await updateDoc(userDocRef, {
           isCheckedIn: true,
-          lastLocation: userLocation,
+          lastLocation: userLocation || userData.lastLocation || null, // Preserve last known location if available
         });
-
-        setIsCheckedIn(true);
+  
         setCheckInMessage("You are now checked in!");
-        setIsErrorMessage(false);
-
-        // Create a notification for the check-in
-        await addDoc(collection(db, "notifications"), {
-          channelId: userChannel.id,
-          userId: user.uid,
-          type: "check-in",
-          message: `${userData.username || "A user"} just checked in!`,
-          timestamp: Timestamp.now(),
-          watched: false,
-        });
-      } else {
-        setCheckInMessage("User data not found. Please try again.");
-        setIsErrorMessage(true);
       }
+  
+      setIsCheckedIn(true);
+      setIsErrorMessage(false);
+  
+      // Make sure user is added to the active channel
+      if (userChannel) {
+        const membersRef = collection(db, `channels/${userChannel.id}/members`);
+        const memberQuery = query(membersRef, where("userUID", "==", user.uid));
+        const memberSnapshot = await getDocs(memberQuery);
+  
+        if (memberSnapshot.empty) {
+          await addDoc(membersRef, { userUID: user.uid });
+          console.log("User added to the channel members.");
+        }
+      }
+  
+      // Send a notification for the check-in
+      await addDoc(collection(db, "notifications"), {
+        channelId: userChannel?.id || "unknown",
+        userId: user.uid,
+        type: "check-in",
+        message: `${user.displayName || "A user"} just checked in!`,
+        timestamp: Timestamp.now(),
+        watched: false,
+      });
     } catch (error) {
       console.error("Error during check-in:", error);
       setCheckInMessage("An error occurred while checking in. Please try again.");
       setIsErrorMessage(true);
     }
-  };
+  };  
 
 
   const handleAddDrink = async (category, subtype) => {
     const key = `${category}_${subtype}`;
     const newDrinks = { ...drinks, [key]: (drinks[key] || 0) + 1 };
     setDrinks(newDrinks);
+  
+    // Only increment totalDrinks if category is not "Others"
     const newTotalDrinks = category !== "Others" ? totalDrinks + 1 : totalDrinks;
     setTotalDrinks(newTotalDrinks);
-
+  
     // Get user location
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -192,17 +204,17 @@ const Home = () => {
           longitude: position.coords.longitude,
         };
         setUserLocation(location);
-
+  
         if (user) {
           try {
             const userDocRef = doc(db, "users", user.uid);
-
+  
             await updateDoc(userDocRef, {
               drinks: newDrinks,
               totalDrinks: newTotalDrinks,
               lastLocation: location,
             });
-
+  
             if ([10, 20, 30].includes(newTotalDrinks)) {
               await addDoc(collection(db, "notifications"), {
                 channelId: userChannel?.id,
@@ -221,22 +233,23 @@ const Home = () => {
       }
     );
   };
-
+  
 
 
   const handleSubtractDrink = async (category, subtype) => {
     const key = `${category}_${subtype}`;
     if (drinks[key] > 0) {
       const newDrinks = { ...drinks, [key]: drinks[key] - 1 };
-      setDrinks(newDrinks); // Update local state
-
+      setDrinks(newDrinks);
+  
+      // Only decrement totalDrinks if category is not "Others"
       const newTotalDrinks = category !== "Others" ? totalDrinks - 1 : totalDrinks;
-      setTotalDrinks(newTotalDrinks); // Update local total drinks state
-
+      setTotalDrinks(newTotalDrinks);
+  
       if (user) {
         try {
           const userDocRef = doc(db, "users", user.uid);
-
+  
           // Update Firestore
           await updateDoc(userDocRef, {
             drinks: newDrinks,
@@ -248,6 +261,7 @@ const Home = () => {
       }
     }
   };
+  
 
   const handleResetDrinks = async () => {
     setDrinks({});
@@ -262,6 +276,25 @@ const Home = () => {
       } catch (error) {
         console.error("Error resetting drinks:", error);
       }
+    }
+  };
+
+  const visibleSubtypes = () => {
+    if (activeCategory) {
+      return drinkCategories
+        .find((cat) => cat.type === activeCategory)
+        .subtypes.map((subtype) => ({
+          category: activeCategory,
+          subtype,
+          count: drinks[`${activeCategory}_${subtype}`] || 0,
+        }));
+    } else {
+      return Object.entries(drinks)
+        .filter(([, count]) => count > 0)
+        .map(([key, count]) => {
+          const [category, subtype] = key.split("_");
+          return { category, subtype, count };
+        });
     }
   };
 
@@ -294,7 +327,7 @@ const Home = () => {
         {drinkCategories.map((category) => (
           <button
             key={category.type}
-            onClick={() => setActiveCategory(category.type)}
+            onClick={() => setActiveCategory(activeCategory === category.type ? null : category.type)}
             className={`flex items-center justify-center w-16 h-16 rounded-full shadow-md ${
               activeCategory === category.type
                 ? "bg-[var(--highlight)] text-white"
@@ -322,43 +355,33 @@ const Home = () => {
         />
       )}
   
-      {/* Subtypes for Selected Category */}
-      {activeCategory && (
-        <div className="grid grid-cols-2 gap-4 w-full mb-4">
-          {drinkCategories
-            .find((cat) => cat.type === activeCategory)
-            .subtypes.map((subtype) => (
-              <div
-                key={subtype}
-                className="flex flex-col items-center bg-[var(--bg-neutral)] rounded-lg shadow-md p-4"
+       {/* Subtypes for Selected Category or Drinks with Records */}
+       <div className="grid grid-cols-2 gap-4 w-full mb-4">
+        {visibleSubtypes().map(({ category, subtype, count }) => (
+          <div
+            key={`${category}_${subtype}`}
+            className="flex flex-col items-center bg-[var(--bg-neutral)] rounded-lg shadow-md p-4"
+          >
+            <span className="text-sm font-bold mb-2">{subtype}</span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleSubtractDrink(category, subtype)}
+                className="w-8 h-8 bg-[var(--delete-btn)] text-white rounded-full flex items-center justify-center hover:bg-[var(--delete-btn)]/90"
+                disabled={count === 0}
               >
-                {/* Title */}
-                <span className="text-sm font-bold mb-2">{subtype}</span>
-                {/* Buttons and Count */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handleSubtractDrink(activeCategory, subtype)}
-                    className="w-8 h-8 bg-[var(--delete-btn)] text-white rounded-full flex items-center justify-center hover:bg-[var(--delete-btn)]/90"
-                    disabled={!drinks[`${activeCategory}_${subtype}`]}
-                  >
-                    -
-                  </button>
-  
-                  <span className="text-lg font-bold">
-                    {drinks[`${activeCategory}_${subtype}`] || 0}
-                  </span>
-  
-                  <button
-                    onClick={() => handleAddDrink(activeCategory, subtype)}
-                    className="w-8 h-8 bg-[var(--secondary)] text-white rounded-full flex items-center justify-center hover:bg-[var(--secondary)]/90"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
+                -
+              </button>
+              <span className="text-lg font-bold">{count}</span>
+              <button
+                onClick={() => handleAddDrink(category, subtype)}
+                className="w-8 h-8 bg-[var(--secondary)] text-white rounded-full flex items-center justify-center hover:bg-[var(--secondary)]/90"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
   

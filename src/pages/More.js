@@ -34,6 +34,12 @@ const More = () => {
           disabled
           className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
         >
+          Spin-the-wheel (Comming Soon)
+        </button>
+        <button
+          disabled
+          className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
+        >
           Charts (Coming Soon)
         </button>
         <button

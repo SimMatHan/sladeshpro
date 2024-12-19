@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import DrinkFilled from '../assets/HomeFilled.svg';
@@ -22,15 +22,35 @@ const menuItems = [
 
 const BottomMenu = () => {
   const location = useLocation();
+  const [prevIndex, setPrevIndex] = useState(menuItems.findIndex(item => item.path === location.pathname));
+  const [direction, setDirection] = useState("none");
+
+  useEffect(() => {
+    const currentIndex = menuItems.findIndex(item => item.path === location.pathname);
+    if (currentIndex > prevIndex) {
+      setDirection("forward");
+    } else if (currentIndex < prevIndex) {
+      setDirection("backward");
+    } else {
+      setDirection("none");
+    }
+    setPrevIndex(currentIndex);
+  }, [location.pathname, prevIndex]);
 
   return (
-    <nav className="fixed bottom-20 inset-x-0 bg-[var(--bg-color)] shadow-light flex justify-around py-3 z-50 bottom-menu">
-      {menuItems.map(({ path, icon, iconFilled, label }) => (
+    <nav className="fixed bottom-0 inset-x-0 bg-[var(--bg-color)] shadow-light flex justify-around py-3 z-50 bottom-menu">
+      {menuItems.map(({ path, icon, iconFilled, label }, index) => (
         <Link
           to={path}
           key={path}
-          className={`flex flex-col items-center mb-2 ${
-            location.pathname === path ? "menu-item-active" : ""
+          className={`flex flex-col items-center mb-2 transition-transform duration-300 ${
+            location.pathname === path ? "scale-110" : "scale-100"
+          } ${
+            direction === "forward" && index === prevIndex + 1
+              ? "translate-x-[20%] opacity-50"
+              : direction === "backward" && index === prevIndex - 1
+              ? "-translate-x-[20%] opacity-50"
+              : ""
           }`}
         >
           <img

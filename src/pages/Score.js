@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "../firebaseConfig";
 import { collection, getDocs, query, doc, getDoc } from "firebase/firestore";
+import Lottie from "react-lottie";
+import leaderboardAnimation from "../animations/leaderboard.json";
 
 const Score = ({ activeChannel }) => {
   const [members, setMembers] = useState([]);
@@ -8,6 +10,15 @@ const Score = ({ activeChannel }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userRank, setUserRank] = useState(null);
   const [expandedUserId, setExpandedUserId] = useState(null);
+
+  const lottieOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: leaderboardAnimation,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -64,7 +75,6 @@ const Score = ({ activeChannel }) => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
 
-          // Only include users who are checked in
           if (userData.isCheckedIn) {
             const sladeshSentSnapshot = await getDocs(collection(userDocRef, "sladeshSent"));
             const sladeshSent = sladeshSentSnapshot.docs.map((doc) => doc.data());
@@ -79,10 +89,9 @@ const Score = ({ activeChannel }) => {
               username: userData.username || "Anonymous",
               profileBackgroundColor: userData.profileBackgroundColor || "gray",
               profileImageUrl: userData.profileImageUrl || null,
-              totalDrinks: Object.values(userData.drinks || {}).reduce(
-                (sum, count) => sum + count,
-                0
-              ),
+              totalDrinks: Object.entries(userData.drinks || {})
+                .filter(([key]) => !key.startsWith("Others"))
+                .reduce((sum, [, count]) => sum + count, 0),
               drinks: userData.drinks || {},
               sladeshSent,
               sladeshReceived,
@@ -131,7 +140,9 @@ const Score = ({ activeChannel }) => {
         </div>
       )}
       {loading ? (
-        <p className="text-[var(--text-muted)]">Loading leaderboard...</p>
+        <div className="flex justify-center items-center h-64">
+          <Lottie options={lottieOptions} height={150} width={150} />
+        </div>
       ) : members.length > 0 ? (
         <ul className="space-y-3">
           {members.map((member, index) => (
@@ -141,21 +152,19 @@ const Score = ({ activeChannel }) => {
                 }`}
               onClick={() => toggleExpand(member.id)}
             >
-              {/* Member Overview */}
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-4">
-                  {/* Dynamisk Profilbillede */}
                   <p className="text-lg font-medium text-[var(--text-color)]">
                     {index + 1}.
                   </p>
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
                     style={{
-                      background: member.profileBackgroundColor || "gray", // Sæt baggrundsfarve
+                      background: member.profileBackgroundColor || "gray",
                     }}
                   >
                     {member.profileImageUrl ? (
-                      <span className="text-2xl font-bold">{member.profileImageUrl}</span> // Hvis det er en emoji eller tekst
+                      <span className="text-2xl font-bold">{member.profileImageUrl}</span>
                     ) : (
                       <span className="text-white text-lg font-bold">
                         {member.username?.charAt(0) || "?"}
@@ -176,10 +185,8 @@ const Score = ({ activeChannel }) => {
                 </p>
               </div>
 
-              {/* Expanded Details */}
               {expandedUserId === member.id && (
                 <div className="mt-4 bg-[var(--divider-color)] p-4 rounded-lg">
-                  {/* Drinks Breakdown */}
                   <div className="mb-4">
                     <h4 className="text-md font-semibold text-[var(--secondary)] mb-2">
                       Drinks Breakdown
@@ -193,7 +200,6 @@ const Score = ({ activeChannel }) => {
                     </ul>
                   </div>
 
-                  {/* Sladesh Details */}
                   <div>
                     <h4 className="text-md font-semibold text-[var(--secondary)] mb-2">
                       Sladesh Details

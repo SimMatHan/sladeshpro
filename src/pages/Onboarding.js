@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
+import { motion, AnimatePresence } from "framer-motion";
 
 const slides = [
   {
@@ -28,7 +29,6 @@ const slides = [
         <p className="text-[var(--text-muted)] mb-4">
           Add this website to your home screen for a more native app experience.
         </p>
-        {/* Tabs Container */}
         <div className="flex justify-center space-x-4 mb-4">
           <button
             className={`py-2 px-4 rounded-full ${
@@ -101,7 +101,7 @@ const Onboarding = ({ onComplete }) => {
           console.error("Error updating onboarding status in Firestore:", error);
         }
       }
-      onComplete(); // Opdater state i App.js
+      onComplete();
       navigate("/home");
     }
   };
@@ -111,20 +111,38 @@ const Onboarding = ({ onComplete }) => {
       ? slides[currentSlide].content(selectedBrowser, setSelectedBrowser)
       : slides[currentSlide].content;
 
+  const slideVariants = {
+    initial: { opacity: 0, x: 100 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -100 },
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-[calc(-150px+100vh)] p-6 text-center bg-[var(--bg-color)]">
-      <h1 className="text-3xl font-bold text-[var(--primary)] mb-4">
-        {slides[currentSlide].title}
-      </h1>
-      <div className="text-lg text-[var(--text-muted)] mb-8">
-        {currentContent}
-      </div>
-      <button
-        onClick={handleNext}
-        className="px-6 py-3 bg-[var(--primary)] text-[var(--secondary)] text-lg rounded-full shadow-light hover:bg-[var(--highlight)] transition duration-300"
-      >
-        {currentSlide < slides.length - 1 ? "Next" : "Let's Go"}
-      </button>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSlide}
+          variants={slideVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.5 }}
+          className="w-full"
+        >
+          <h1 className="text-3xl font-bold text-[var(--primary)] mb-4">
+            {slides[currentSlide].title}
+          </h1>
+          <div className="text-lg text-[var(--text-muted)] mb-8">
+            {currentContent}
+          </div>
+          <button
+            onClick={handleNext}
+            className="px-6 py-3 bg-[var(--primary)] text-[var(--secondary)] text-lg rounded-full shadow-light hover:bg-[var(--highlight)] transition duration-300"
+          >
+            {currentSlide < slides.length - 1 ? "Next" : "Let's Go"}
+          </button>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
