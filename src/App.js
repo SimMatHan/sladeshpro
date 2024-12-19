@@ -36,7 +36,7 @@ function App() {
 
   // Show initial loading screen only once
   useEffect(() => {
-    const showInitialLoadingScreen = async () => {
+    const showInitialLoadingScreen = () => {
       if (isInitialLoading) {
         setTimeout(() => {
           setIsInitialLoading(false);
@@ -47,16 +47,18 @@ function App() {
     showInitialLoadingScreen();
   }, [isInitialLoading]);
 
-  // Fetch user onboarding status
+  // Fetch onboarding status
   useEffect(() => {
-    if (!user) return;
-
     const fetchOnboardingStatus = async () => {
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        setHasCompletedOnboarding(userDoc?.data()?.hasCompletedOnboarding || false);
-      } catch (error) {
-        console.error("Error fetching onboarding status:", error);
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          setHasCompletedOnboarding(userDoc?.data()?.hasCompletedOnboarding || false);
+        } catch (error) {
+          console.error("Error fetching onboarding status:", error);
+        } finally {
+          setIsInitialLoading(false); // Stop loading
+        }
       }
     };
 
@@ -64,21 +66,30 @@ function App() {
   }, [user]);
 
   // Fetch user's channels and set a default active channel
-  useEffect(() => {
-    const fetchChannels = async () => {
-      if (!user) return;
-
+// Fetch user's channels and set a default active channel
+useEffect(() => {
+  const fetchChannels = async () => {
+    if (user) {
       try {
         const defaultChannelRef = doc(db, "channels", defaultChannelId);
         const defaultChannelSnap = await getDoc(defaultChannelRef);
 
         if (!defaultChannelSnap.exists()) {
+          // Create the default channel if it doesn't exist
           await setDoc(defaultChannelRef, {
             name: "Den Åbne Kanal",
-            members: [],
+            members: [user.uid], // Add the current user as the first member
             accessCode: "0000",
             createdAt: new Date().toISOString(),
           });
+        } else {
+          // Add the user to the default channel if not already a member
+          const channelData = defaultChannelSnap.data();
+          if (!channelData.members.includes(user.uid)) {
+            await updateDoc(defaultChannelRef, {
+              members: [...channelData.members, user.uid],
+            });
+          }
         }
 
         const channelsQuery = query(
@@ -89,57 +100,20 @@ function App() {
         const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
         setChannelList(channels);
-        setActiveChannel(channels.find((channel) => channel.id === defaultChannelId)?.id || channels[0]?.id);
+        setActiveChannel(defaultChannelId); // Always set the default channel as the active one
       } catch (error) {
-        console.error("Error fetching channels:", error);
+        console.error("Error fetching or creating channels:", error);
       }
-    };
+    }
+  };
 
-    fetchChannels();
-  }, [user]);
+  fetchChannels();
+}, [user]);
 
-  // Update user token for FCM
-  useEffect(() => {
-    const updateUserToken = async () => {
-      if (!user) return;
 
-      try {
-        const token = await getToken(messaging, {
-          vapidKey: "BB6-r3d9E_779-12K-jd8BdUjLD1BSubLa3peJG80AfQaXcCC4Nf8_vFPD8NbCTogqVPi9mDZlaygSPx1F4Sw1k",
-        });
-
-        if (token) {
-          await setDoc(doc(db, "users", user.uid), { fcmToken: token }, { merge: true });
-        } else {
-          console.error("No FCM token received. Ensure notification permissions are granted.");
-        }
-      } catch (error) {
-        console.error("Could not update FCM token:", error);
-      }
-    };
-
-    updateUserToken();
-  }, [user]);
-
-  // Listen for FCM messages
-  useEffect(() => {
-    const unsubscribeOnMessage = onMessage(messaging, (payload) => {
-      const { notification } = payload;
-      setNotifications((prev) => [
-        ...prev,
-        {
-          title: notification.title,
-          body: notification.body,
-          icon: notification.icon,
-        },
-      ]);
-    });
-
-    return () => unsubscribeOnMessage();
-  }, []);
 
   if (loading || isInitialLoading) {
-    return <LoadingScreen />;
+    return <LoadingScreen user={user} hasCompletedOnboarding={hasCompletedOnboarding} />;
   }
 
   const toggleNotifications = () => setShowNotifications((prev) => !prev);

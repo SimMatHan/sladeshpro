@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { db } from "../firebaseConfig";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Login = () => {
@@ -51,16 +51,16 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setMessage("");
-
+  
     if (password.length < 6) {
       setError("Password should be at least 6 characters.");
       return;
     }
-
+  
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
+  
       // Add the user to the Firestore "users" collection
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
@@ -73,7 +73,29 @@ const Login = () => {
         lastLocation: null,
         hasCompletedOnboarding: false, // Default onboarding status
       });
-
+  
+      // Ensure the user is added to the default channel
+      const defaultChannelRef = doc(db, "channels", "DenAbneKanal");
+      const defaultChannelSnap = await getDoc(defaultChannelRef);
+  
+      if (!defaultChannelSnap.exists()) {
+        // Create the default channel if it doesn't exist
+        await setDoc(defaultChannelRef, {
+          name: "Den Åbne Kanal",
+          members: [user.uid],
+          accessCode: "0000",
+          createdAt: new Date().toISOString(),
+        });
+      } else {
+        // Add the user to the default channel if not already a member
+        const channelData = defaultChannelSnap.data();
+        if (!channelData.members.includes(user.uid)) {
+          await updateDoc(defaultChannelRef, {
+            members: [...channelData.members, user.uid],
+          });
+        }
+      }
+  
       setMessage("Registration successful!");
       navigate("/onboarding"); // Redirect new users to onboarding
     } catch (error) {
@@ -81,6 +103,7 @@ const Login = () => {
       setError("An error occurred during registration. Please try again.");
     }
   };
+  
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { doc, getDoc, collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import ChannelsIcon from "../assets/ChannelsIcon.svg";
-import ChannelsIconFilled from "../assets/ChannelsIconFilled.svg";
+import ArrowDown from "../assets/ArrowDown.svg";
+import ArrowUp from "../assets/ArrowUp.svg";
 import NotificationsIcon from "../assets/Notifications.svg";
 import NotificationsFilled from "../assets/NotificationsFilled.svg";
 import CommentsIcon from "../assets/CommentIcon.svg";
@@ -10,6 +10,7 @@ import CommentsIconFilled from "../assets/CommentIconFilled.svg";
 import Notifications from "./Notifications";
 import Channels from "./Channels";
 import Comments from "./Comments";
+import { useLocation } from "react-router-dom";
 
 const TopMenu = ({ activeChannel, setActiveChannel }) => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -17,6 +18,13 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [showCommentsDropdown, setShowCommentsDropdown] = useState(false);
   const [activeChannelName, setActiveChannelName] = useState("Select Channel");
+  const location = useLocation();
+
+  // Close dropdowns on location change
+  useEffect(() => {
+    setShowNotificationsDropdown(false);
+    setShowCommentsDropdown(false);
+  }, [location.pathname]);
 
   // Fetch unread notifications count
   useEffect(() => {
@@ -95,23 +103,33 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
 
       {/* Top Menu */}
       <div className="fixed top-0 inset-x-0 bg-[var(--bg-color)] shadow-heavy p-4 flex justify-between items-center z-50">
-        {/* Channel Name */}
-        <div className="flex items-center space-x-4">
-          <span className="text-md font-semibold text-[var(--text-color)]">
-            {activeChannelName}
-          </span>
-        </div>
-
-        {/* Icons Section */}
-        <div className="flex items-center space-x-4">
-          {/* Channels Icon */}
+        {/* Left Section */}
+        <div className="flex items-center space-x-2">
           <button
             onClick={toggleChannelsDropdown}
+            className="relative focus:outline-none hover:opacity-80 transition flex items-center space-x-1"
+          >
+            <span className="text-md font-semibold text-[var(--text-color)]">
+              {activeChannelName}
+            </span>
+            <img
+              src={showChannelsDropdown ? ArrowUp : ArrowDown}
+              alt="Toggle Channels"
+              className="h-4 w-4"
+            />
+          </button>
+        </div>
+
+        {/* Right Section */}
+        <div className="flex items-center space-x-4">
+          {/* Comments Icon */}
+          <button
+            onClick={toggleCommentsDropdown}
             className="relative focus:outline-none hover:opacity-80 transition"
           >
             <img
-              src={showChannelsDropdown ? ChannelsIconFilled : ChannelsIcon}
-              alt="Channels"
+              src={showCommentsDropdown ? CommentsIconFilled : CommentsIcon}
+              alt="Comments"
               className="h-6 w-6"
             />
           </button>
@@ -131,18 +149,6 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
                 {unreadCount}
               </span>
             )}
-          </button>
-
-          {/* Comments Icon */}
-          <button
-            onClick={toggleCommentsDropdown}
-            className="relative focus:outline-none hover:opacity-80 transition"
-          >
-            <img
-              src={showCommentsDropdown ? CommentsIconFilled : CommentsIcon}
-              alt="Comments"
-              className="h-6 w-6"
-            />
           </button>
         </div>
       </div>
