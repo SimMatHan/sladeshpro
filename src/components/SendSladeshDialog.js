@@ -83,7 +83,7 @@ const SendSladeshDialog = ({ onClose, onSladeshSent, message }) => {
           </p>
         ) : (
           <>
-            <p className="text-[var(--primary)] font-semibold mb-4">Sladesh Sent!</p>
+            <p className="text-[var(--secondary)] font-semibold mb-4">Sladesh Sent!</p>
             <Confetti width={window.innerWidth} height={window.innerHeight} />
           </>
         )}
@@ -91,7 +91,7 @@ const SendSladeshDialog = ({ onClose, onSladeshSent, message }) => {
           onClick={onClose}
           className={`py-2 px-4 rounded-lg shadow-md transition ${
             message
-              ? "bg-[var(--primary)] text-white hover:bg-[var(--highlight)]"
+              ? "bg-[var(--secondary)] text-white hover:bg-[var(--highlight)]"
               : "bg-[var(--delete-btn)] text-white hover:bg-[var(--delete-btn)]/90"
           }`}
           disabled={tiltDetected && !message}

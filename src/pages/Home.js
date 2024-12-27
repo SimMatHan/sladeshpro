@@ -19,7 +19,7 @@ const drinkCategories = [
   {
     type: "Beer",
     icon: "🍺",
-    subtypes: ["Lager", "Classic", "IPA", "Stout", "Pilsner", "Wheat Beer", "Sour", "Blanc"] // Pilsner is especially popular in Denmark 
+    subtypes: ["Lager", "Classic", "IPA", "Stout", "Guiness", "Pilsner", "Wheat Beer", "Sour", "Blanc"] // Pilsner is especially popular in Denmark 
   },
   {
     type: "Wine",
@@ -193,29 +193,29 @@ const Home = () => {
         console.error("User not logged in");
         return;
       }
-  
+
       if (!isCheckedIn) {
         console.warn("User must be checked in to record a drink.");
         setCheckInMessage("Please check in before adding a drink.");
         setIsErrorMessage(true);
         return;
       }
-  
+
       const key = `${category}_${subtype}`;
       const newDrinks = { ...drinks, [key]: (drinks[key] || 0) + 1 };
       setDrinks(newDrinks);
-  
+
       const newTotalDrinks = category !== "Others" ? totalDrinks + 1 : totalDrinks;
       setTotalDrinks(newTotalDrinks);
-  
+
       const userDocRef = doc(db, "users", user.uid);
-  
+
       // Update Firestore
       await updateDoc(userDocRef, {
         drinks: newDrinks,
         totalDrinks: newTotalDrinks,
       });
-  
+
       if ([10, 20, 30].includes(newTotalDrinks)) {
         await addDoc(collection(db, "notifications"), {
           channelId: userChannel?.id,
@@ -230,7 +230,7 @@ const Home = () => {
       setIsErrorMessage(true);
     }
   };
-  
+
 
 
 
@@ -240,17 +240,17 @@ const Home = () => {
         console.error("User not logged in");
         return;
       }
-  
+
       if (drinks[`${category}_${subtype}`] > 0) {
         const key = `${category}_${subtype}`;
         const newDrinks = { ...drinks, [key]: drinks[key] - 1 };
         setDrinks(newDrinks);
-  
+
         const newTotalDrinks = category !== "Others" ? totalDrinks - 1 : totalDrinks;
         setTotalDrinks(newTotalDrinks);
-  
+
         const userDocRef = doc(db, "users", user.uid);
-  
+
         // Update Firestore
         await updateDoc(userDocRef, {
           drinks: newDrinks,
@@ -263,7 +263,7 @@ const Home = () => {
       setIsErrorMessage(true);
     }
   };
-  
+
 
 
   const handleResetDrinks = async () => {
@@ -307,7 +307,7 @@ const Home = () => {
       {/* Locked Header Section */}
       <div className="sticky top-0 z-10 w-full bg-[var(--bg-color)]">
         {/* Total Drinks Counter */}
-        <div className="flex justify-between items-center w-full bg-[var(--bg-neutral)] rounded-lg shadow-md p-4 mb-6">
+        <div className="flex justify-between items-center w-full bg-[var(--bg-neutral)] rounded-lg shadow-md p-4 mb-4">
           <div className="flex flex-col items-start">
             <p className="text-lg font-medium">Total drinks</p>
             <span className="text-4xl font-bold text-[var(--secondary)]">
@@ -317,8 +317,8 @@ const Home = () => {
           <button
             onClick={handleCheckIn}
             className={`py-2 px-4 rounded-lg text-[var(--text-color)] font-medium ${isCheckedIn
-                ? "bg-[var(--disabled)] cursor-not-allowed text-[var(--text-muted)]"
-                : "bg-[var(--primary)] hover:bg-[var(--highlight)]"
+              ? "bg-[var(--disabled)] cursor-not-allowed text-[var(--text-muted)]"
+              : "bg-[var(--primary)] hover:bg-[var(--highlight)]"
               }`}
             disabled={isCheckedIn}
           >
@@ -327,30 +327,33 @@ const Home = () => {
         </div>
 
         {/* Drink Category Icons */}
-        <div className="grid grid-cols-4 gap-4 mb-8 w-full">
-          {drinkCategories.map((category) => (
+        <div className="w-full overflow-x-auto py-4 p-2">
+          <div className="grid grid-flow-col gap-4 auto-cols-max">
+            {drinkCategories.map((category) => (
+              <button
+                key={category.type}
+                onClick={() =>
+                  setActiveCategory(
+                    activeCategory === category.type ? null : category.type
+                  )
+                }
+                className={`flex items-center justify-center w-16 h-16 rounded-full shadow-md ${activeCategory === category.type
+                    ? "bg-[var(--highlight)] text-white"
+                    : "bg-[var(--bg-neutral)] text-white"
+                  }`}
+              >
+                <span className="text-2xl">{category.icon}</span>
+              </button>
+            ))}
             <button
-              key={category.type}
-              onClick={() =>
-                setActiveCategory(
-                  activeCategory === category.type ? null : category.type
-                )
-              }
-              className={`flex items-center justify-center w-16 h-16 rounded-full shadow-md ${activeCategory === category.type
-                  ? "bg-[var(--highlight)] text-white"
-                  : "bg-[var(--primary)] text-white"
-                }`}
+              onClick={() => setIsDialogOpen(true)} // Åbn dialogboks
+              className="flex items-center justify-center w-16 h-16 bg-[var(--error-color)] font-medium text-[var(--bg-neutral)] rounded-full shadow-md hover:bg-[var(--delete-btn)]/90"
             >
-              <span className="text-2xl">{category.icon}</span>
+              Reset
             </button>
-          ))}
-          <button
-            onClick={() => setIsDialogOpen(true)} // Åbn dialogboks
-            className="flex items-center justify-center w-16 h-16 bg-[var(--delete-btn)] font-medium text-[var(--bg-neutral)] rounded-full shadow-md hover:bg-[var(--delete-btn)]/90"
-          >
-            Reset
-          </button>
+          </div>
         </div>
+
       </div>
 
       {isDialogOpen && (
@@ -365,7 +368,7 @@ const Home = () => {
 
       {/* Subtypes for Selected Category or Drinks with Records */}
       <div className="w-full overflow-y-auto max-h-[calc(100vh-300px)]">
-        <div className="grid grid-cols-2 gap-4 w-full mb-4">
+        <div className="grid grid-cols-2 gap-4 w-full mb-4 mt-2">
           {visibleSubtypes().map(({ category, subtype, count }) => (
             <div
               key={`${category}_${subtype}`}

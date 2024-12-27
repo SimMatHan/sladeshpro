@@ -100,7 +100,7 @@ const Channels = ({ activeChannel, setActiveChannel, onClose }) => {
                   onClick={() => handleSelectChannel(channel.id)}
                   className={`block w-full text-left px-4 py-2 rounded-lg shadow-md transition ${
                     activeChannel === channel.id
-                      ? "bg-[var(--primary)] text-[var(--secondary)] font-semibold"
+                      ? "bg-[var(--secondary)] text-[var(--text-color)] font-semibold"
                       : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
                   } hover:bg-[var(--highlight)] hover:text-[var(--secondary)]`}
                 >

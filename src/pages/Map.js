@@ -5,17 +5,8 @@ import L from "leaflet";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-// Fix for default Leaflet marker icon
-import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Default marker icon for all users
-const DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
 
 const BlueMarker = L.icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
@@ -33,13 +24,6 @@ const GreenMarker = L.icon({
   popupAnchor: [1, -34],
 });
 
-// Custom red marker for the current user
-const RedIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
 
 L.Marker.prototype.options.icon = GreenMarker;
 
@@ -61,6 +45,9 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 const MapPage = ({ activeChannel, isOverlayOpen }) => {
   const [memberLocations, setMemberLocations] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(
+    document.documentElement.getAttribute("data-theme") === "dark"
+  );
 
   // Fetch members' locations for the active channel
   useEffect(() => {
@@ -161,6 +148,21 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
 
   const groupedLocations = groupMarkersByProximity(memberLocations);
 
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(
+        document.documentElement.getAttribute("data-theme") === "dark"
+      );
+    });
+  
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+  
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className={`p-2 ${isOverlayOpen ? "opacity-50 pointer-events-none" : ""}`}>
       <div style={{ height: "calc(-250px + 100vh)", width: "100%" }}>
@@ -169,10 +171,14 @@ const MapPage = ({ activeChannel, isOverlayOpen }) => {
           zoom={11}
           className="h-full w-full"
         >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://carto.com/attributions">CartoDB</a> contributors'
-          />
+      <TileLayer
+        url={
+          isDarkMode
+            ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        }
+        attribution='&copy; <a href="https://carto.com/attributions">CartoDB</a> contributors'
+      />
 
           {/* Grouped markers */}
           {groupedLocations.map((group, index) => {

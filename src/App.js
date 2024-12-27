@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback  } from "react";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Home from "./pages/Home";
@@ -16,9 +16,9 @@ import BottomMenu from "./components/BottomMenu";
 import TopMenu from "./components/TopMenu";
 import LoadingScreen from "./components/LoadingScreen";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, db, messaging } from "./firebaseConfig";
+import { auth, db } from "./firebaseConfig";
 import { doc, getDoc, collection, query, where, getDocs, setDoc, updateDoc } from "firebase/firestore";
-import { getToken, onMessage } from "firebase/messaging";
+import UncompletedSladeshModal from "./components/UncompletedSladeshModal"; // Ny komponent til popup
 import "./App.css";
 
 function App() {
@@ -28,11 +28,54 @@ function App() {
   const [showComments, setShowComments] = useState(false);
   const [activeChannel, setActiveChannel] = useState(null);
   const [channelList, setChannelList] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [uncompletedSladesh, setUncompletedSladesh] = useState(null); // Tilføjet til popup-logik
   const location = useLocation();
 
   const defaultChannelId = "DenAbneKanal";
+
+  const fetchUncompletedSladesh = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const receivedRef = collection(db, `users/${user.uid}/sladesh`);
+      const receivedSnapshot = await getDocs(receivedRef);
+
+      const uncompleted = receivedSnapshot.docs
+        .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+        .find((sladesh) => !sladesh.completed);
+
+      setUncompletedSladesh(uncompleted || null);
+    } catch (error) {
+      console.error("Error fetching uncompleted Sladesh:", error);
+    }
+  }, [user]);
+
+  useEffect(() => {
+  fetchUncompletedSladesh(); // Sørg for at kalde funktionen her
+}, [fetchUncompletedSladesh]);
+
+  const handleCompleteSladesh = async () => {
+    if (!uncompletedSladesh) return;
+
+    try {
+      const sladeshRef = doc(
+        db,
+        `users/${user.uid}/sladesh/${uncompletedSladesh.id}`
+      );
+      const senderSladeshRef = doc(
+        db,
+        `users/${uncompletedSladesh.fromUID}/sladeshSent/${uncompletedSladesh.id}`
+      );
+
+      await updateDoc(sladeshRef, { completed: true });
+      await updateDoc(senderSladeshRef, { completed: true });
+
+      setUncompletedSladesh(null); // Fjern popup efter completion
+    } catch (error) {
+      console.error("Error completing Sladesh:", error);
+    }
+  };
 
   // Show initial loading screen only once
   useEffect(() => {
@@ -46,6 +89,7 @@ function App() {
 
     showInitialLoadingScreen();
   }, [isInitialLoading]);
+
 
   // Fetch onboarding status
   useEffect(() => {
@@ -66,49 +110,49 @@ function App() {
   }, [user]);
 
   // Fetch user's channels and set a default active channel
-// Fetch user's channels and set a default active channel
-useEffect(() => {
-  const fetchChannels = async () => {
-    if (user) {
-      try {
-        const defaultChannelRef = doc(db, "channels", defaultChannelId);
-        const defaultChannelSnap = await getDoc(defaultChannelRef);
+  // Fetch user's channels and set a default active channel
+  useEffect(() => {
+    const fetchChannels = async () => {
+      if (user) {
+        try {
+          const defaultChannelRef = doc(db, "channels", defaultChannelId);
+          const defaultChannelSnap = await getDoc(defaultChannelRef);
 
-        if (!defaultChannelSnap.exists()) {
-          // Create the default channel if it doesn't exist
-          await setDoc(defaultChannelRef, {
-            name: "Den Åbne Kanal",
-            members: [user.uid], // Add the current user as the first member
-            accessCode: "0000",
-            createdAt: new Date().toISOString(),
-          });
-        } else {
-          // Add the user to the default channel if not already a member
-          const channelData = defaultChannelSnap.data();
-          if (!channelData.members.includes(user.uid)) {
-            await updateDoc(defaultChannelRef, {
-              members: [...channelData.members, user.uid],
+          if (!defaultChannelSnap.exists()) {
+            // Create the default channel if it doesn't exist
+            await setDoc(defaultChannelRef, {
+              name: "Den Åbne Kanal",
+              members: [user.uid], // Add the current user as the first member
+              accessCode: "0000",
+              createdAt: new Date().toISOString(),
             });
+          } else {
+            // Add the user to the default channel if not already a member
+            const channelData = defaultChannelSnap.data();
+            if (!channelData.members.includes(user.uid)) {
+              await updateDoc(defaultChannelRef, {
+                members: [...channelData.members, user.uid],
+              });
+            }
           }
+
+          const channelsQuery = query(
+            collection(db, "channels"),
+            where("members", "array-contains", user.uid)
+          );
+          const snapshot = await getDocs(channelsQuery);
+          const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+          setChannelList(channels);
+          setActiveChannel(defaultChannelId); // Always set the default channel as the active one
+        } catch (error) {
+          console.error("Error fetching or creating channels:", error);
         }
-
-        const channelsQuery = query(
-          collection(db, "channels"),
-          where("members", "array-contains", user.uid)
-        );
-        const snapshot = await getDocs(channelsQuery);
-        const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-        setChannelList(channels);
-        setActiveChannel(defaultChannelId); // Always set the default channel as the active one
-      } catch (error) {
-        console.error("Error fetching or creating channels:", error);
       }
-    }
-  };
+    };
 
-  fetchChannels();
-}, [user]);
+    fetchChannels();
+  }, [user]);
 
 
 
@@ -132,6 +176,12 @@ useEffect(() => {
           activeChannel={activeChannel}
           setActiveChannel={setActiveChannel}
           channelList={channelList}
+        />
+      )}
+      {uncompletedSladesh && (
+        <UncompletedSladeshModal
+          sladesh={uncompletedSladesh}
+          onComplete={handleCompleteSladesh}
         />
       )}
       <div className="page-content">

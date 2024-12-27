@@ -8,7 +8,7 @@ const DialogBox = ({ title, message, onClose }) => {
         <p className="text-[var(--text-muted)] mb-6">{message}</p>
         <button
           onClick={onClose}
-          className="w-full py-2 bg-[var(--primary)] text-white rounded-lg shadow-md hover:bg-[var(--highlight)] transition"
+          className="w-full py-2 bg-[var(--secondary)] text-white rounded-lg shadow-md hover:bg-[var(--highlight)] transition"
         >
           OK
         </button>

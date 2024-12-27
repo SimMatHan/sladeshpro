@@ -12,6 +12,8 @@ import Channels from "./Channels";
 import Comments from "./Comments";
 import { useLocation } from "react-router-dom";
 
+const defaultChannelId = "DenAbneKanal"; // Default channel ID
+
 const TopMenu = ({ activeChannel, setActiveChannel }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showChannelsDropdown, setShowChannelsDropdown] = useState(false);
@@ -19,6 +21,13 @@ const TopMenu = ({ activeChannel, setActiveChannel }) => {
   const [showCommentsDropdown, setShowCommentsDropdown] = useState(false);
   const [activeChannelName, setActiveChannelName] = useState("Select Channel");
   const location = useLocation();
+
+  // Ensure activeChannel is always set to the default channel
+  useEffect(() => {
+    if (!activeChannel) {
+      setActiveChannel(defaultChannelId); // Set activeChannel to default
+    }
+  }, [activeChannel, setActiveChannel]);
 
   // Close dropdowns on location change
   useEffect(() => {

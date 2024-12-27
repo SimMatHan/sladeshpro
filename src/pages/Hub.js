@@ -368,7 +368,7 @@ const Hub = ({ activeChannel }) => {
   }, [activeTab, fetchSentSladesh, fetchReceivedSladesh]);
 
   return (
-    <div className="p-2">
+    <div className="p-1">
       {sladeshConfirmation && (
         <div className="mb-4 text-center text-green-500 font-semibold">
           {sladeshConfirmation}
@@ -400,14 +400,14 @@ const Hub = ({ activeChannel }) => {
           onCancel={() => setShowConfirmation(false)}
         />
       )}
-      {/* Tab Navigation */}
+
       {/* Tab Navigation */}
       <div className="flex justify-between items-center rounded-full mb-4">
         <button
           onClick={() => setActiveTab("Active")}
           className={`flex-1 py-2 mx-1 text-center rounded-full ${activeTab === "Active"
-            ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
-            : "bg-[var(--primary)] text-[var(--secondary)]"
+            ? "bg-[var(--highlight)] text-[var(--text-color)] font-semibold"
+            : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
             }`}
         >
           Active
@@ -415,8 +415,8 @@ const Hub = ({ activeChannel }) => {
         <button
           onClick={() => setActiveTab("Sent")}
           className={`flex-1 py-2 mx-1 text-center rounded-full ${activeTab === "Sent"
-            ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
-            : "bg-[var(--primary)] text-[var(--secondary)]"
+            ? "bg-[var(--highlight)] text-[var(--text-color)] font-semibold"
+            : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
             }`}
         >
           Sent
@@ -424,8 +424,8 @@ const Hub = ({ activeChannel }) => {
         <button
           onClick={() => setActiveTab("Inbox")}
           className={`flex-1 py-2 mx-1 text-center rounded-full ${activeTab === "Inbox"
-            ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
-            : "bg-[var(--primary)] text-[var(--secondary)]"
+            ? "bg-[var(--highlight)] text-[var(--text-color)] font-semibold"
+            : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
             }`}
         >
           Inbox
@@ -446,50 +446,53 @@ const Hub = ({ activeChannel }) => {
             <h2 className="text-lg font-semibold mb-3 text-[var(--text-color)]">
               Active Members
             </h2>
-            <ul className="space-y-4">
-              {checkedInMembers.map((member) => (
-                <li
-                  key={member.uid}
-                  className="bg-[var(--bg-neutral)] p-4 rounded-lg shadow flex items-center justify-between"
-                >
-                  {/* Profilbillede */}
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-semibold text-white"
-                      style={{
-                        background: member.profileBackgroundColor || "#CCCCCC",
-                      }}
-                    >
-                      {member.profileImageUrl ? (
-                        <span>{member.profileImageUrl}</span>
-                      ) : (
-                        <span>{member.userName.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    {/* Brugerens Navn */}
-                    <span className="text-[var(--text-color)] font-medium">
-                      {member.userName}
-                    </span>
-                  </div>
-                  {/* Send Sladesh Knap */}
-                  <button
-                    onClick={() => {
-                      if (member.canSendSladesh) {
-                        setExpandedMemberId(member.uid);
-                        setShowSendSladeshDialog(true);
-                      }
-                    }}
-                    disabled={!member.canSendSladesh}
-                    className={`py-2 px-4 rounded-lg text-sm font-medium ${member.canSendSladesh
-                      ? "bg-[var(--primary)] text-white hover:bg-[var(--highlight)]"
-                      : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                      }`}
+            {checkedInMembers.length === 0 ? (
+              <p className="text-[var(--text-muted)] text-center">
+                No one else is checked in on this channel.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {checkedInMembers.map((member) => (
+                  <li
+                    key={member.uid}
+                    className="bg-[var(--bg-neutral)] p-4 rounded-lg shadow flex items-center justify-between"
                   >
-                    {member.canSendSladesh ? "Send Sladesh" : "Sladesh Used"}
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-semibold text-white"
+                        style={{
+                          background: member.profileBackgroundColor || "#CCCCCC",
+                        }}
+                      >
+                        {member.profileImageUrl ? (
+                          <span>{member.profileImageUrl}</span>
+                        ) : (
+                          <span>{member.userName.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <span className="text-[var(--text-color)] font-medium">
+                        {member.userName}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (member.canSendSladesh) {
+                          setExpandedMemberId(member.uid);
+                          setShowSendSladeshDialog(true);
+                        }
+                      }}
+                      disabled={!member.canSendSladesh}
+                      className={`py-2 px-4 rounded-lg text-sm font-medium ${member.canSendSladesh
+                          ? "bg-[var(--primary)] text-white hover:bg-[var(--highlight)]"
+                          : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                        }`}
+                    >
+                      {member.canSendSladesh ? "Send Sladesh" : "Sladesh Used"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
@@ -498,41 +501,48 @@ const Hub = ({ activeChannel }) => {
             <h2 className="text-lg font-semibold mb-4 text-[var(--text-color)]">
               Sent Sladeshes
             </h2>
-            <ul className="space-y-4">
-              {sentSladesh.map((sladesh) => (
-                <li
-                  key={sladesh.id}
-                  className={`p-4 rounded-lg shadow-md flex justify-between items-center ${sladesh.completed
-                    ? "bg-[var(--primary)]"
-                    : "bg-[var(--bg-neutral)]"
-                    }`}
-                >
-                  <div>
-                    <p className="text-[var(--text-color)] font-semibold">
-                      Sladesh sent to:{" "}
-                      <span className="text-[var(--secondary)]">{sladesh.toName}</span>
-                    </p>
-                    <p className="text-[var(--text-muted)] text-sm">
-                      {new Date(sladesh.sentAt).toLocaleDateString()}{" "}
-                      {new Date(sladesh.sentAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  <p
-                    className={`text-sm font-semibold ${sladesh.completed
-                      ? "text-[var(--secondary)]"
-                      : "text-[var(--text-muted)]"
+            {sentSladesh.length === 0 ? (
+              <p className="text-[var(--text-muted)] text-center">
+                You haven't sent any Sladeshes yet.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {sentSladesh.map((sladesh) => (
+                  <li
+                    key={sladesh.id}
+                    className={`p-4 rounded-lg shadow-md flex justify-between items-center ${sladesh.completed
+                        ? "bg-[var(--primary)]"
+                        : "bg-[var(--bg-neutral)]"
                       }`}
                   >
-                    {sladesh.completed ? "Completed" : "Not Completed"}
-                  </p>
-                </li>
-              ))}
-            </ul>
+                    <div>
+                      <p className="text-[var(--text-color)] font-semibold">
+                        Sladesh sent to:{" "}
+                        <span className="text-[var(--secondary)]">
+                          {sladesh.toName}
+                        </span>
+                      </p>
+                      <p className="text-[var(--text-muted)] text-sm">
+                        {new Date(sladesh.sentAt).toLocaleDateString()}{" "}
+                        {new Date(sladesh.sentAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <p
+                      className={`text-sm font-semibold ${sladesh.completed
+                          ? "text-[var(--secondary)]"
+                          : "text-[var(--text-muted)]"
+                        }`}
+                    >
+                      {sladesh.completed ? "Completed" : "Not Completed"}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-
         )}
 
         {activeTab === "Inbox" && (
@@ -540,52 +550,59 @@ const Hub = ({ activeChannel }) => {
             <h2 className="text-lg font-semibold mb-4 text-[var(--text-color)]">
               Received Sladeshes
             </h2>
-            <ul className="space-y-4">
-              {receivedSladesh.map((sladesh) => (
-                <li
-                  key={sladesh.id}
-                  className={`p-4 rounded-lg shadow-md flex justify-between items-center ${sladesh.completed
-                      ? "bg-[var(--primary)]"
-                      : "bg-[var(--bg-neutral)]"
-                    }`}
-                >
-                  <div>
-                    <p
-                      className={`font-semibold ${sladesh.completed
-                          ? "text-[var(--secondary)]"
-                          : "text-[var(--text-color)]"
-                        }`}
-                    >
-                      Sladesh sent from:{" "}
-                      <span className="text-[var(--secondary)]">{sladesh.fromName}</span>
-                    </p>
-                    <p className="text-[var(--text-muted)] text-sm">
-                      {new Date(sladesh.sentAt).toLocaleDateString()}{" "}
-                      {new Date(sladesh.sentAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  {!sladesh.completed ? (
-                    <button
-                      onClick={() =>
-                        handleCompleteSladesh(sladesh.id, sladesh.fromUID)
-                      }
-                      className="py-2 px-4 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--highlight)] transition"
-                    >
-                      Complete
-                    </button>
-                  ) : (
-                    <span className="font-semibold text-[var(--secondary)]">
-                      Completed
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+            {receivedSladesh.length === 0 ? (
+              <p className="text-[var(--text-muted)] text-center">
+                You haven't received any Sladeshes yet.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {receivedSladesh.map((sladesh) => (
+                  <li
+                    key={sladesh.id}
+                    className={`p-4 rounded-lg shadow-md flex justify-between items-center ${sladesh.completed
+                        ? "bg-[var(--primary)]"
+                        : "bg-[var(--bg-neutral)]"
+                      }`}
+                  >
+                    <div>
+                      <p
+                        className={`font-semibold ${sladesh.completed
+                            ? "text-[var(--secondary)]"
+                            : "text-[var(--text-color)]"
+                          }`}
+                      >
+                        Sladesh sent from:{" "}
+                        <span className="text-[var(--secondary)]">
+                          {sladesh.fromName}
+                        </span>
+                      </p>
+                      <p className="text-[var(--text-muted)] text-sm">
+                        {new Date(sladesh.sentAt).toLocaleDateString()}{" "}
+                        {new Date(sladesh.sentAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    {!sladesh.completed ? (
+                      <button
+                        onClick={() =>
+                          handleCompleteSladesh(sladesh.id, sladesh.fromUID)
+                        }
+                        className="py-2 px-4 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--highlight)] transition"
+                      >
+                        Complete
+                      </button>
+                    ) : (
+                      <span className="font-semibold text-[var(--secondary)]">
+                        Completed
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-
         )}
       </div>
     </div>

@@ -16,16 +16,16 @@ body {
 /* Colors and fonts */
 :root {
   /* Light Mode */
-  --primary: #9FE870;
-  --secondary: #163300;
-  --bg-neutral: #ECEFEB;
-  --bg-color: #fdfdfd;
-  --text-color: #260A2F;
+  --primary: #F0E8D1;
+  --secondary: #92b874bd;
+  --bg-neutral: #fafafa;
+  --bg-color: #ffffff;
+  --text-color: #000000;
   --text-muted: #777; /* Dæmpet tekst */
   --input-border: #CCC; /* Input kantfarve */
-  --highlight: #F4C600; /* Lys gul som accent */
+  --highlight: #2d750391; /* Lys gul som accent */
   --disabled: #cecece;
-  --delete-btn: #B70000; /* Rød til delete-knap */
+  --delete-btn: #757575a1; /* Rød til delete-knap */
   --error-color: #AF5A3F;
 
   --font-xs: 12px;
@@ -54,13 +54,32 @@ body {
 }
 
 [data-theme="dark"] {
-  --primary: #90CAF9;
-  --secondary: #66BB6A;
-  --bg-color: #121212;
-  --text-color: #FFFFFF; /* Hvid i dark mode */
-  --divider-color: #424242;
-  --error-color: #EF5350;
+  --secondary: #6b8f59bd; /* Mørkere grøn for mørk baggrund */
+  --bg-neutral: #1f1f1f; /* Neutral mørk baggrund */
+  --bg-color: #121212; /* Primær baggrundsfarve */
+  --text-color: #ffffff; /* Hvid tekst for kontrast */
+  --text-muted: #b3b3b3; /* Dæmpet tekst med lys grå nuance */
+  --input-border: #3a3a3a; /* Kantfarve for inputs */
+  --highlight: #3f8c53; /* Mørkere accent grøn */
+  --disabled: #545454; /* Grå for deaktiverede elementer */
+  --delete-btn: #ff4d4d; /* Klar rød til delete-knap */
+  --error-color: #e57373; /* Lys rød for fejl */
 }
+
+[data-theme="bif"] {
+  /* Brøndby-Inspireret Theme */
+--secondary: #ffc72c; /* Brøndby gul */
+--bg-neutral: #f0f8ff; /* Lys blå neutral baggrund */
+--bg-color: #004b87; /* Brøndby blå som primær baggrund */
+--text-color: #ffffff; /* Hvid tekst for kontrast */
+--text-muted: #d9d9d9; /* Lys grå dæmpet tekst */
+--input-border: #cce0ff; /* Lys blå til input-kanter */
+--highlight: #ffc72c; /* Gul til accent */
+--disabled: #748ba5; /* Dæmpet blå til deaktiverede elementer */
+--delete-btn: #ff4d4d; /* Klar rød til slette-knap */
+--error-color: #e63946; /* Rød til fejl */
+}
+
 
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-color);
@@ -77,7 +96,7 @@ p {
 
 /* Top Menu & Bottom Menu */
 .top-menu, .bottom-menu {
-  @apply flex items-center justify-around w-full py-3 bg-gray-100 border-t border-gray-200 fixed z-50;
+  @apply flex items-center justify-around w-full py-3 bg-[var(--bg-neutral)] border-t border-[var(--bg-neutral)] fixed z-50;
 }
 .top-menu {
   @apply top-0;
@@ -93,7 +112,7 @@ p {
 
 /* Button Styles */
 .button-primary {
-  @apply bg-[var(--primary)] text-[var(--text-color)] py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
+  @apply bg-[var(--secondary)] text-[var(--text-color)] py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out;
 }
 .button-primary:hover {
   @apply bg-[var(--highlight)];

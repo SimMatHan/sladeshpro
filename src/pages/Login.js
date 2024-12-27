@@ -61,7 +61,7 @@ const Login = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
   
-      // Add the user to the Firestore "users" collection
+      // Tilføj brugeren til Firestore "users"-kollektionen
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         username: username,
@@ -74,35 +74,39 @@ const Login = () => {
         hasCompletedOnboarding: false, // Default onboarding status
       });
   
-      // Ensure the user is added to the default channel
+      // Sikr, at brugeren tilføjes til den åbne kanal
       const defaultChannelRef = doc(db, "channels", "DenAbneKanal");
       const defaultChannelSnap = await getDoc(defaultChannelRef);
   
       if (!defaultChannelSnap.exists()) {
-        // Create the default channel if it doesn't exist
+        // Opret kanalen, hvis den ikke findes
         await setDoc(defaultChannelRef, {
           name: "Den Åbne Kanal",
-          members: [user.uid],
+          members: [{ uid: user.uid, email: user.email }], // Tilføj uid og email som medlem
           accessCode: "0000",
           createdAt: new Date().toISOString(),
         });
       } else {
-        // Add the user to the default channel if not already a member
+        // Tilføj brugeren til kanalen, hvis vedkommende ikke allerede er medlem
         const channelData = defaultChannelSnap.data();
-        if (!channelData.members.includes(user.uid)) {
+        const existingMembers = channelData.members || [];
+        const isAlreadyMember = existingMembers.some((member) => member.uid === user.uid);
+  
+        if (!isAlreadyMember) {
           await updateDoc(defaultChannelRef, {
-            members: [...channelData.members, user.uid],
+            members: [...existingMembers, { uid: user.uid, email: user.email }], // Opdater medlemmerne med e-mail
           });
         }
       }
   
       setMessage("Registration successful!");
-      navigate("/onboarding"); // Redirect new users to onboarding
+      navigate("/onboarding"); // Redirect nye brugere til onboarding
     } catch (error) {
       console.error("Registration error:", error);
       setError("An error occurred during registration. Please try again.");
     }
   };
+  
   
 
   const handleLogin = async (e) => {

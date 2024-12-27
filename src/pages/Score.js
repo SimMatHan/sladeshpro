@@ -129,7 +129,7 @@ const Score = ({ activeChannel }) => {
   };
 
   return (
-    <div className="p-4 bg-[var(--bg-color)] text-[var(--text-muted)]">
+    <div className="p-1 bg-[var(--bg-color)] text-[var(--text-muted)]">
       <h2 className="text-xl font-bold mb-2 text-[var(--text-color)]">Leaderboard</h2>
       {currentUser && userRank && members.length > 0 && (
         <div className="mb-4 text-[var(--text-color)]">
@@ -188,7 +188,7 @@ const Score = ({ activeChannel }) => {
               {expandedUserId === member.id && (
                 <div className="mt-4 bg-[var(--divider-color)] p-4 rounded-lg">
                   <div className="mb-4">
-                    <h4 className="text-md font-semibold text-[var(--secondary)] mb-2">
+                    <h4 className="text-md font-semibold text-[var(--text-color)] mb-2">
                       Drinks Breakdown
                     </h4>
                     <ul className="list-disc ml-4 text-sm">
@@ -201,7 +201,7 @@ const Score = ({ activeChannel }) => {
                   </div>
 
                   <div>
-                    <h4 className="text-md font-semibold text-[var(--secondary)] mb-2">
+                    <h4 className="text-md font-semibold text-[var(--text-color)] mb-2">
                       Sladesh Details
                     </h4>
                     <div className="text-sm">

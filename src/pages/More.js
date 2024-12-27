@@ -13,44 +13,40 @@ const More = () => {
   };
 
   return (
-    <div className="p-4 bg-[var(--bg-color)] min-h-screen">
-      <h1 className="text-xl font-bold mb-6 text-[var(--text-color)]">
-        More
-      </h1>
-      <div className="space-y-6">
+    <div className="p-1 bg-[var(--bg-color)] min-h-screen">
+      <h1 className="text-xl font-bold mb-6 text-[var(--text-color)]">More</h1>
+      <div className="space-y-2">
         <button
           onClick={handleNavigateToChannelSettings}
-          className="w-full py-4 bg-[var(--primary)] text-[var(--secondary)] rounded-lg font-semibold hover:bg-[var(--highlight)] transition"
+          className="w-full py-3 px-4 bg-[var(--secondary)] text-[var(--text-color)] border border-[var(--input-border)] rounded-lg flex justify-between items-center hover:bg-[var(--bg-neutral)] transition"
         >
-          Manage Channels
+          <span>Manage Channels</span>
+          <span className="text-[var(--text-muted)]">›</span>
         </button>
         <button
           onClick={handleNavigateToUserSettings}
-          className="w-full py-4 bg-[var(--primary)] text-[var(--secondary)] rounded-lg font-semibold hover:bg-[var(--highlight)] transition"
+          className="w-full py-3 px-4 bg-[var(--secondary)] text-[var(--text-color)] border border-[var(--input-border)] rounded-lg flex justify-between items-center hover:bg-[var(--bg-neutral)] transition"
         >
-          User Settings
+          <span>User Settings</span>
+          <span className="text-[var(--text-muted)]">›</span>
         </button>
         <button
           disabled
-          className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
+          className="w-full py-3 px-4 bg-[var(--disabled)] text-[var(--text-muted)] border border-[var(--disabled)] rounded-lg flex justify-between items-center cursor-not-allowed"
         >
-          Spin-the-wheel (Comming Soon)
+          <span>Spin-the-wheel (Coming Soon)</span>
+          <span className="text-[var(--disabled)]">›</span>
         </button>
         <button
           disabled
-          className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
+          className="w-full py-3 px-4 bg-[var(--disabled)] text-[var(--text-muted)] border border-[var(--disabled)] rounded-lg flex justify-between items-center cursor-not-allowed"
         >
-          Charts (Coming Soon)
-        </button>
-        <button
-          disabled
-          className="w-full py-4 bg-[var(--disabled)] text-[var(--text-muted)] rounded-lg font-semibold cursor-not-allowed"
-        >
-          DarkMode (Coming Soon)
+          <span>Charts (Coming Soon)</span>
+          <span className="text-[var(--disabled)]">›</span>
         </button>
       </div>
     </div>
-  );
+  );  
 };
 
 export default More;

@@ -15,7 +15,7 @@ const Confirmation = ({ title, message, onConfirm, onCancel }) => {
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg shadow-md hover:bg-[var(--highlight)] transition"
+            className="px-4 py-2 bg-[var(--secondary)] text-white rounded-lg shadow-md hover:bg-[var(--highlight)] transition"
           >
             Confirm
           </button>

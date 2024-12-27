@@ -66,7 +66,7 @@ const DesignProfilePicPopup = ({ onClose }) => {
                 key={index}
                 className={`p-2 rounded transition ${
                   emoji === selectedAvatar
-                    ? "bg-[var(--primary)] text-[var(--secondary)]"
+                    ? "bg-[var(--secondary)] text-[var(--text-color)]"
                     : "bg-[var(--bg-neutral)] text-[var(--text-muted)]"
                 }`}
                 onClick={() => setSelectedAvatar(emoji)}

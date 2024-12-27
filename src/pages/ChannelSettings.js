@@ -98,13 +98,13 @@ const ChannelSettings = () => {
 
   return (
     <div className="p-4 bg-[var(--bg-color)] min-h-screen">
-      <div className="flex w-full rounded-full p-2">
+      <div className="flex w-full rounded-full">
         <button
           onClick={() => setActiveTab("Channels")}
           className={`flex-1 py-2 mx-1 text-center rounded-full ${
             activeTab === "Channels"
-              ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
-              : "bg-[var(--primary)] text-[var(--secondary)]"
+              ? "bg-[var(--highlight)] text-[var(--text-color)] font-semibold"
+              : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
           }`}
         >
           Join
@@ -113,8 +113,8 @@ const ChannelSettings = () => {
           onClick={() => setActiveTab("Request Channel")}
           className={`flex-1 py-2 mx-1 text-center rounded-full ${
             activeTab === "Request Channel"
-              ? "bg-[var(--highlight)] text-[var(--secondary)] font-semibold"
-              : "bg-[var(--primary)] text-[var(--secondary)]"
+              ? "bg-[var(--highlight)] text-[var(--text-color)] font-semibold"
+              : "bg-[var(--bg-neutral)] text-[var(--text-color)]"
           }`}
         >
           Request
@@ -139,7 +139,7 @@ const ChannelSettings = () => {
               />
               <button
                 onClick={handleJoinChannel}
-                className="w-full mt-4 py-3 bg-[var(--primary)] text-[var(--secondary)] rounded-lg font-semibold hover:bg-[var(--highlight)] transition"
+                className="w-full mt-4 py-3 bg-[var(--secondary)] text-[var(--text-color)] rounded-lg font-semibold hover:bg-[var(--highlight)] transition"
               >
                 Join Channel
               </button>
